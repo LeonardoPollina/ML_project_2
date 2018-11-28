@@ -72,6 +72,9 @@ def extract_data(filename, num_images):
             print ('File ' + image_filename + ' does not exist')
 
     num_images = len(imgs)
+    print('num_images')
+    print(f'{imgs[0].shape}')
+
     IMG_WIDTH = imgs[0].shape[0]
     IMG_HEIGHT = imgs[0].shape[1]
     N_PATCHES_PER_IMAGE = (IMG_WIDTH/IMG_PATCH_SIZE)*(IMG_HEIGHT/IMG_PATCH_SIZE)
