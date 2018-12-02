@@ -125,10 +125,19 @@ def patch_to_label(patch):
     else:
         return 0
 
-def padding(imgs,pad_size):
+def padding_imgs(imgs,pad_size):
     length_padded_image = imgs.shape[1] + 2*pad_size
     height_padded_image = imgs.shape[2] + 2*pad_size
     X = np.empty((imgs.shape[0],length_padded_image,height_padded_image,3))
+    #pad the images
+    for i in range(imgs.shape[0]):
+            X[i] = cv2.copyMakeBorder(imgs[i],pad_size,pad_size,pad_size,pad_size,cv2.BORDER_REFLECT_101)
+    return X
+
+def padding_GT(imgs,pad_size):
+    length_padded_image = imgs.shape[1] + 2*pad_size
+    height_padded_image = imgs.shape[2] + 2*pad_size
+    X = np.empty((imgs.shape[0],length_padded_image,height_padded_image))
     #pad the images
     for i in range(imgs.shape[0]):
             X[i] = cv2.copyMakeBorder(imgs[i],pad_size,pad_size,pad_size,pad_size,cv2.BORDER_REFLECT_101)
