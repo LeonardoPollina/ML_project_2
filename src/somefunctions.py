@@ -2,6 +2,8 @@ import numpy as np
 import os
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
+import cv2
+
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -122,3 +124,12 @@ def patch_to_label(patch):
         return 1
     else:
         return 0
+
+def padding(imgs,pad_size):
+    length_padded_image = imgs.shape[1] + 2*pad_size
+    height_padded_image = imgs.shape[2] + 2*pad_size
+    X = np.empty((imgs.shape[0],length_padded_image,height_padded_image,3))
+    #pad the images
+    for i in range(imgs.shape[0]):
+            X[i] = cv2.copyMakeBorder(imgs[i],pad_size,pad_size,pad_size,pad_size,cv2.BORDER_REFLECT_101)
+    return X
