@@ -2,7 +2,6 @@ import numpy as np
 import os
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-import cv2
 
 
 from keras.models import Sequential
@@ -15,6 +14,12 @@ from keras.regularizers import l2
 from keras.layers import LeakyReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from keras.losses import binary_crossentropy, categorical_crossentropy, sparse_categorical_crossentropy
+
+#########################################################################################
+##################### GIVEN FUNCTIONS ###################################################
+#########################################################################################
+
+foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
 
 def load_image(infilename):
     data = mpimg.imread(infilename)
@@ -56,13 +61,6 @@ def img_crop(im, w, h):
             list_patches.append(im_patch)
     return list_patches
 
-def pick_test_images():
-    test_imgs = []
-    for i in range(1, 51):
-        name = '../Data/test_set_images/test_'+str(i)+'/test_' + str(i) + '.png'
-        test_imgs.append(load_image(name))
-    return test_imgs
-
 def value_to_class(v):
     df = np.sum(v)
     if df > foreground_threshold:
@@ -72,6 +70,9 @@ def value_to_class(v):
 
     
 def label_to_img(imgwidth, imgheight, w, h, labels):
+    ''' From a vector of labels creates an image of (imgwidth x imgheight).
+        Each label refers to a patch of dimension (w x h)
+    '''
     im = np.zeros([imgwidth, imgheight])
     idx = 0
     for i in range(0,imgheight,h):
@@ -96,7 +97,34 @@ def concatenate_images(img, gt_img):
         cimg = np.concatenate((img8, gt_img_3c), axis=1)
     return cimg
 
+# assign a label to a patch
+def patch_to_label(patch):
+    df = np.mean(patch)
+    if df > foreground_threshold:
+        return 1
+    else:
+        return 0
+
+#########################################################################################
+####################### OUR FUNCTIONS ###################################################
+#########################################################################################
+
+def MY_masks_to_submission(submission_filename, masks1D):
+    """ Converts the matrix containing all the labels into a submission file.
+        
+        masks1D should be a 2D array, where the ith row contains the labels of the ith test image.
+    """
+    with open(submission_filename, 'w') as f:
+        f.write('id,prediction\n')
+        for idx,fn in enumerate(masks1D):
+            f.writelines('{}\n'.format(s) for s in MY_mask_to_submission_strings(fn,idx))
+      
+    
 def MY_mask_to_submission_strings(mask1D, fileNumber):
+    '''To be called inside MY_masks_to_submission.
+    
+        Write the informations of the image fileNumber, starting from the array of labels.
+    '''
     img_number = fileNumber
     patch_size = 16
     test_size = 608
@@ -107,38 +135,53 @@ def MY_mask_to_submission_strings(mask1D, fileNumber):
             label = patch_to_label(patch)
             yield("{:03d}_{}_{},{}".format(img_number+1, j, i, label))
 
-
-def MY_masks_to_submission(submission_filename, masks1D):
-    """Converts images into a submission file"""
-    with open(submission_filename, 'w') as f:
-        f.write('id,prediction\n')
-        for idx,fn in enumerate(masks1D):
-            f.writelines('{}\n'.format(s) for s in MY_mask_to_submission_strings(fn,idx))
             
-foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
-
-# assign a label to a patch
-def patch_to_label(patch):
-    df = np.mean(patch)
-    if df > foreground_threshold:
-        return 1
-    else:
-        return 0
-
+def pick_test_images(root = '../Data'):
+    ''' Pick the images for the submission 
+    '''
+    test_imgs = []
+    for i in range(1, 51):
+        name = root + '/test_set_images/test_'+str(i)+'/test_' + str(i) + '.png'
+        test_imgs.append(load_image(name))
+    return test_imgs
+    
+    
 def padding_imgs(imgs,pad_size):
+    ''' Pad an array of RGB images using NumPy
+    '''
     length_padded_image = imgs.shape[1] + 2*pad_size
     height_padded_image = imgs.shape[2] + 2*pad_size
     X = np.empty((imgs.shape[0],length_padded_image,height_padded_image,3))
     #pad the images
     for i in range(imgs.shape[0]):
-            X[i] = cv2.copyMakeBorder(imgs[i],pad_size,pad_size,pad_size,pad_size,cv2.BORDER_REFLECT_101)
+        img = imgs[i]
+        temp = np.empty( (length_padded_image, height_padded_image,3) )
+        for j in range(3): #RGB channels
+            temp[:,:,j] = np.pad(img[:,:,j],pad_size,'reflect')
+        X[i] = temp
     return X
 
+
 def padding_GT(imgs,pad_size):
+    ''' Pad an array of groundtruth images using NumPy
+    '''
     length_padded_image = imgs.shape[1] + 2*pad_size
     height_padded_image = imgs.shape[2] + 2*pad_size
     X = np.empty((imgs.shape[0],length_padded_image,height_padded_image))
     #pad the images
     for i in range(imgs.shape[0]):
-            X[i] = cv2.copyMakeBorder(imgs[i],pad_size,pad_size,pad_size,pad_size,cv2.BORDER_REFLECT_101)
+            X[i] = np.pad(imgs[i],pad_size,'reflect')
     return X
+
+def imgs_to_windows(imgs, img_size, patch_size, window_size):
+    ''' Takes an array of padded images and outputs an array with the windows of (window_size x window_size) centered around the patches
+    '''
+    windows = []
+    for idx in range(imgs.shape[0]):
+        im = imgs[idx]
+        for i in range(img_size//patch_size):
+            for j in range(img_size//patch_size):
+                temp = im[j*patch_size:window_size + j*patch_size,
+                                  i*patch_size:window_size + i*patch_size]
+                windows.append(temp)
+    return np.asarray(windows)
