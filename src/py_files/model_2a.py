@@ -30,10 +30,8 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'NicolaWeights'
-SubmissionName = 'NicolaSubmission.csv'
-
-
+NameWeights = 'model_2a_Weights'
+SubmissionName = 'model_2a_Submission.csv'
 
 ###############################################################################
 ###########             DATA GENERATION              ##########################

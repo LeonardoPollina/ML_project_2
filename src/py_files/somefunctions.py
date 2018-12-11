@@ -8,12 +8,12 @@ from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
 from keras.layers import Convolution2D, MaxPooling2D
 from keras.optimizers import Adam
-from keras.utils import np_utils
+from keras import utils
 from keras import backend as K
 from keras.regularizers import l2
 from keras.layers import LeakyReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
-from keras.losses import binary_crossentropy, categorical_crossentropy, sparse_categorical_crossentropy
+from keras.losses import binary_crossentropy, categorical_crossentropy
 from keras import initializers as K_init
 
 #########################################################################################

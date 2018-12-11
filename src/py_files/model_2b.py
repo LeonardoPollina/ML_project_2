@@ -31,8 +31,8 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'NicolaWeights'
-SubmissionName = 'NicolaSubmission.csv'
+NameWeights = 'model_2b_Weights'
+SubmissionName = 'model_2b_Submission.csv'
 
 
 
@@ -47,7 +47,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
     while 1:        
         # Generate one minibatch
         X_batch = np.empty((batch_size, input_size, input_size, 3))
-        Y_batch = np.empty(batch_size)
+        Y_batch = np.empty((batch_size,2))
         low=pad_rotate_size + patch_size // 2
         high = pad_rotate_size + train_shape - patch_size // 2
         for i in range(batch_size):
@@ -76,7 +76,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
             #same degree
             gt_temp = scipy.ndimage.interpolation.rotate(gt_temp, degree)
             gt_temp = crop_center(gt_temp,patch_size,patch_size)
-            Y_batch[i] = patch_to_label(gt_temp)
+            Y_batch[i] = utils.to_categorical(patch_to_label(gt_temp),2)
             
         yield X_batch, Y_batch
         
@@ -121,7 +121,7 @@ def create_model():
     model.add(Dropout(0.5))         
     model.add(Dense(256, activation = 'relu', kernel_regularizer = l2(reg)))
     model.add(Dropout(0.5))       
-    model.add(Dense(units = 1, activation = 'sigmoid'))
+    model.add(Dense(units = 2, activation = 'softmax'))
 
     #Optimizer          
     opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
@@ -134,7 +134,7 @@ def create_model():
     # Stops the training process upon convergence
     stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
     
-    model.compile(loss=binary_crossentropy,
+    model.compile(loss=categorical_crossentropy,
                   optimizer=opt,
                   metrics=['acc', f1_score])
     
