@@ -14,6 +14,7 @@ from keras.regularizers import l2
 from keras.layers import LeakyReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from keras.losses import binary_crossentropy, categorical_crossentropy, sparse_categorical_crossentropy
+from keras import initializers as K_init
 
 #########################################################################################
 ##################### GIVEN FUNCTIONS ###################################################
@@ -109,6 +110,26 @@ def patch_to_label(patch):
 ####################### OUR FUNCTIONS ###################################################
 #########################################################################################
 
+def split_data(x, y, ratio, seed=1):
+    """
+    Split the dataset based on the split ratio. If ratio is 0.8 you will have 80% of your data 
+    set dedicated to training and the rest dedicated to testing. 
+    Return the training then testing sets (x_tr, x_te) and training then testing labels (y_tr, y_te).
+    """
+    #Set seed
+    np.random.seed(seed)
+    xrand = np.random.permutation(x)
+    np.random.seed(seed)
+    yrand = np.random.permutation(y)
+    #Used to compute how many samples correspond to the desired ratio.
+    limit = int(y.shape[0]*ratio)
+    x_tr = xrand[:limit]
+    x_te = xrand[(limit+1):]
+    y_tr = yrand[:limit]
+    y_te = yrand[(limit+1):]
+    return x_tr, x_te, y_tr, y_te
+
+
 def MY_masks_to_submission(submission_filename, masks1D):
     """ Converts the matrix containing all the labels into a submission file.
         
@@ -172,6 +193,25 @@ def padding_GT(imgs,pad_size):
     for i in range(imgs.shape[0]):
             X[i] = np.pad(imgs[i],pad_size,'reflect')
     return X
+
+
+def imgs_to_patches(imgs, img_size, patch_size, input_size):
+    ''' Takes an array of images and outputs an array with the patches of (input_size x input_size) centered around the patches of 16x16
+    '''
+    pad_size = int(input_size/2 - patch_size/2)
+    patches = []
+    for idx in range(imgs.shape[0]):
+        im = imgs[idx]
+        for i in range(0,img_size,patch_size):
+            for j in range(0,img_size,patch_size):
+                temp = im[j:j+patch_size, i:i+patch_size, :]
+                temp = temp.reshape(1,patch_size,patch_size,3)
+                temp = padding_imgs(temp,pad_size)
+                temp = temp.reshape(input_size,input_size,3)
+                patches.append(temp)
+    return np.asarray(patches)
+
+
 
 def imgs_to_windows(imgs, img_size, patch_size, window_size):
     ''' Takes an array of padded images and outputs an array with the windows of (window_size x window_size) centered around the patches
