@@ -225,3 +225,36 @@ def imgs_to_windows(imgs, img_size, patch_size, window_size):
                                   i*patch_size:window_size + i*patch_size]
                 windows.append(temp)
     return np.asarray(windows)
+
+
+def data_augmentation(X, rot_flag, flip_flag, bright_flag):
+    '''Data augmentation on X, element of size (input_size * input_size * 3)'''
+    #flip
+    if flip_flag:
+        flip_decision = np.random.choice(3)
+        if flip_decision == 1:
+            X = np.flipud(X)
+        if flip_decision == 2: 
+            X = np.fliplr(X)
+    
+    #rotate
+    if rot_flag:
+        number_of_rotations = np.random.choice(3)
+        X = np.rot90(X, number_of_rotations)
+    
+    #contrast and brightness
+    if bright_flag:
+        brightness = np.random.rand()*0.3 - 0.15
+        contrast = np.random.rand()*0.25 - 0.125
+        X = np.clip( X * (contrast/0.5+1) - contrast + brightness, 0, 1)
+        
+    return X
+
+def crop_center(img,cropx,cropy):
+    if len(img.shape) == 3:
+        y,x, _ = img.shape
+    if len(img.shape) == 2:
+        y,x = img.shape
+    startx = x//2-(cropx//2)
+    starty = y//2-(cropy//2)    
+    return img[starty:starty+cropy,startx:startx+cropx]    
