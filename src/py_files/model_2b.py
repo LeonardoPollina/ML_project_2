@@ -13,7 +13,6 @@ pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
 input_size = 64
-pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
 
@@ -32,8 +31,8 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = '1212Weights'
-SubmissionName = '1212Submission.csv'
+NameWeights = 'model_2b_Weights'
+SubmissionName = 'model_2b_Submission.csv'
 
 
 
@@ -98,7 +97,8 @@ def create_model():
     
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Convolution2D(64, (3,3)
+    model.add(Convolution2D(64, (3,3), 
+                            input_shape = ( input_size, input_size, 3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))

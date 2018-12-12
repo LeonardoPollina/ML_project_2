@@ -100,7 +100,8 @@ def create_model():
     
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Convolution2D(64, (3,3),
+    model.add(Convolution2D(64, (3,3), 
+                            input_shape = ( input_size, input_size, 3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
@@ -138,7 +139,7 @@ def create_model():
     
     model.compile(loss=categorical_crossentropy,
                   optimizer=opt,
-                  metrics=['acc'])
+                  metrics=['acc', f1_score])
     
     return model, stop_callback, lr_callback
 
