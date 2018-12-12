@@ -15,6 +15,7 @@ pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
 input_size = 64
+pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
 
