@@ -1,5 +1,3 @@
-# Functions to generate the model with arbitrary rotations, with 2 nodes at the end
-
 from somefunctions import *
 from f1_score import *
 import scipy
@@ -12,15 +10,15 @@ import scipy
 pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
-input_size = 64
-pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
+input_size = 72
 pad_size = int(input_size/2 - patch_size/2)
+pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
 
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 45
+nb_epoch = 40
 batch_size = 250
 steps_per_epoch = 125 #the number of training samples is huge, arbitrary value
 
@@ -32,8 +30,9 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'model_2b_Weights'
-SubmissionName = 'model_2b_Submission.csv'
+NameWeights = 'model_3_72_Weights'
+SubmissionName = 'model_3_72_Submission.csv'
+PredictionName = 'prediction_72_model3'
 
 
 
@@ -98,14 +97,15 @@ def create_model():
     
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Convolution2D(64, (3,3), 
-                            input_shape = ( input_size, input_size, 3),
+    model.add(Convolution2D(128, (3,3), 
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    
-    model.add(Convolution2D(128, (3,3),
+
+    model.add(Dropout(0.5))
+
+    model.add(Convolution2D(256, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
@@ -117,12 +117,10 @@ def create_model():
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Flatten())
-    model.add(Dense(512, activation = 'relu', kernel_regularizer = l2(reg)))
-    model.add(Dropout(0.5))         
-    model.add(Dense(256, activation = 'relu', kernel_regularizer = l2(reg)))
+    model.add(Flatten())       
+    model.add(Dense(128, activation = 'relu', kernel_regularizer = l2(reg)))
     model.add(Dropout(0.5))       
-    model.add(Dense(units = 2, activation = 'softmax'))
+    model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(reg)))
 
     #Optimizer          
     opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
@@ -137,7 +135,7 @@ def create_model():
     
     model.compile(loss=categorical_crossentropy,
                   optimizer=opt,
-                  metrics=['acc', f1_score])
+                  metrics=['acc'])
     
     return model, stop_callback, lr_callback
 
