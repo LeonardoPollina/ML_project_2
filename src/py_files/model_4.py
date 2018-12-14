@@ -11,7 +11,7 @@ from keras.layers import BatchNormalization
 pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
-input_size = 64
+input_size = 72
 pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
@@ -101,6 +101,7 @@ def create_model():
                            ))
 
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+
     model.add(Dropout(0.5))
 
     model.add(Convolution2D(64, (3,3), 
@@ -113,7 +114,6 @@ def create_model():
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
 
-    model.add(BatchNormalization())
 
     model.add(Dropout(0.5))
 
@@ -127,11 +127,10 @@ def create_model():
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-
-    model.add(BatchNormalization())
+    model.add(Dropout(0.5)) 
 
     model.add(Flatten())       
-    model.add(Dense(128, activation = 'relu', kernel_regularizer = l2(reg)))
+    model.add(Dense(256, activation = 'relu', kernel_regularizer = l2(reg)))
     model.add(Dropout(0.5))       
     model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(reg)))
 

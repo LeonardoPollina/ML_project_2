@@ -10,7 +10,7 @@ import scipy
 pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
-input_size = 64
+input_size = 72
 pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
@@ -18,9 +18,9 @@ pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 45
-batch_size = 250
-steps_per_epoch = 125 #the number of training samples is huge, arbitrary value
+nb_epoch = 40
+batch_size = 125
+steps_per_epoch = 250 #the number of training samples is huge, arbitrary value
 
 
 # Data augmentation parameters
@@ -104,7 +104,8 @@ def create_model():
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            )                   (x0)
     x0 = MaxPooling2D((2, 2), strides=(2, 2))  (x0)
-    x0 = BatchNormalization()                  (x0)
+    x0 = Dropout(0.5)                          (x0)
+
     x0 = Convolution2D(64, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
@@ -118,6 +119,8 @@ def create_model():
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                             )                  (x0)
     xl = MaxPooling2D((2, 2), strides=(2, 2))  (xl)
+    xl = Dropout(0.5)                          (xl)
+
     xl = Convolution2D(256, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
@@ -129,8 +132,7 @@ def create_model():
     xr = Flatten() (x0)
 
     #merge left and right  ##############################################################################
-    concat = concatenate([xl, xr])   
-    concat = BatchNormalization()                                          (concat)
+    concat = concatenate([xl, xr])                                         
     concat = Dense(256, activation = 'relu', kernel_regularizer = l2(reg)) (concat)
     concat = Dropout(0.5)                                                  (concat)
     concat = Dense(units = 2, activation = 'softmax')                      (concat)
