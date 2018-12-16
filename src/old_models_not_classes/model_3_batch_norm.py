@@ -1,8 +1,7 @@
-# Model with arbitrary rotations, with one node at the end.
-
 from somefunctions import *
 from f1_score import *
 import scipy
+from keras.layers import BatchNormalization
 
 ###############################################################################
 ###########             PARAMETERS              ###############################
@@ -13,25 +12,30 @@ pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
 input_size = 64
+pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
 
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 45 
+epochs = 40
 batch_size = 250
 steps_per_epoch = 125 #the number of training samples is huge, arbitrary value
 
 
 # Data augmentation parameters
 FLIP_FLAG = True # add random flips to the patches
+ROTATION_FLAG = True # add random rotation to the patches
 BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'model_2a_Weights'
-SubmissionName = 'model_2a_Submission.csv'
+NameWeights = 'model_3_batch_norm_Weights'
+SubmissionName = 'model_3_batch_norm_Submission.csv'
+PredictionName = 'prediction_model3_batch_norm'
+
+
 
 ###############################################################################
 ###########             DATA GENERATION              ##########################
@@ -44,7 +48,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
     while 1:        
         # Generate one minibatch
         X_batch = np.empty((batch_size, input_size, input_size, 3))
-        Y_batch = np.empty(batch_size)
+        Y_batch = np.empty((batch_size,2))
         low=pad_rotate_size + patch_size // 2
         high = pad_rotate_size + train_shape - patch_size // 2
         for i in range(batch_size):
@@ -73,7 +77,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
             #same degree
             gt_temp = scipy.ndimage.interpolation.rotate(gt_temp, degree)
             gt_temp = crop_center(gt_temp,patch_size,patch_size)
-            Y_batch[i] = patch_to_label(gt_temp)
+            Y_batch[i] = utils.to_categorical(patch_to_label(gt_temp),2)
             
         yield X_batch, Y_batch
         
@@ -82,7 +86,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
 ###########              MODEL CREATION              ##########################
 ###############################################################################
 
-def create_model():
+def CreateModel():
     '''Create a sequential model'''        
     model = Sequential()
     
@@ -94,14 +98,17 @@ def create_model():
     
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Convolution2D(64, (3,3), 
-                            input_shape = ( input_size, input_size, 3),
+    model.add(Convolution2D(128, (3,3), 
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    
-    model.add(Convolution2D(128, (3,3),
+
+    model.add(BatchNormalization())
+
+    model.add(Dropout(0.5))
+
+    model.add(Convolution2D(256, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
@@ -112,13 +119,13 @@ def create_model():
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    
-    model.add(Flatten())
-    model.add(Dense(512, activation = 'relu', kernel_regularizer = l2(reg)))
-    model.add(Dropout(0.5))         
-    model.add(Dense(256, activation = 'relu', kernel_regularizer = l2(reg)))
+
+    model.add(BatchNormalization())
+
+    model.add(Flatten())       
+    model.add(Dense(128, activation = 'relu', kernel_regularizer = l2(reg)))
     model.add(Dropout(0.5))       
-    model.add(Dense(units = 1, activation = 'sigmoid'))
+    model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(reg)))
 
     #Optimizer          
     opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
@@ -131,9 +138,9 @@ def create_model():
     # Stops the training process upon convergence
     stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
     
-    model.compile(loss=binary_crossentropy,
+    model.compile(loss=categorical_crossentropy,
                   optimizer=opt,
-                  metrics=['acc', f1_score])
+                  metrics=['acc'])
     
     return model, stop_callback, lr_callback
 
@@ -151,14 +158,14 @@ def train(X, Y):
     print(f'Batch_size: {batch_size} \nSteps per epoch: {steps_per_epoch} \n')
     
     
-    model, stop_callback, lr_callback = create_model()
+    model, stop_callback, lr_callback = CreateModel()
     
     np.random.seed(20122018) # Reproducibility + remember the deadline is the 20.12.2018
     
     try:
         model.fit_generator(generate_minibatch_with_arbitrary_rotation(X,Y),
                             steps_per_epoch=steps_per_epoch,
-                            nb_epoch=nb_epoch,
+                            epochs=epochs,
                             verbose=1,
                             callbacks=[lr_callback, stop_callback])
     except KeyboardInterrupt:

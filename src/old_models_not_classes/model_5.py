@@ -10,7 +10,7 @@ import scipy
 pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
-input_size = 64
+input_size = 72
 pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
@@ -18,7 +18,7 @@ pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 40
+epochs = 40
 batch_size = 125
 steps_per_epoch = 250 #the number of training samples is huge, arbitrary value
 
@@ -30,9 +30,10 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'model_3_Weights'
-SubmissionName = 'model_3_Submission.csv'
-PredictionName = 'prediction_model3'
+#Other stuff
+NameWeights = 'model_5_weights'
+SubmissionName = 'model_5_submission.csv'
+PredictionName = 'prediction_model5'
 
 
 
@@ -80,47 +81,65 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
             
         yield X_batch, Y_batch
         
+        
 
 ###############################################################################
 ###########              MODEL CREATION              ##########################
 ###############################################################################
+from keras.layers import Input, concatenate
+from keras.models import Model
+from keras.layers import BatchNormalization
 
-def create_model():
-    '''Create a sequential model'''        
-    model = Sequential()
-    
-    model.add(Convolution2D(64, (5,5), 
+def CreateModel():    
+
+    #root (X0): conv, pooling, conv, pooling  ##########################################################
+    inputs = Input(shape=(input_size, input_size, 3))
+    x0 = Convolution2D(32, (5,5), 
                             input_shape = ( input_size, input_size, 3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
-                           ))
-    
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    
-    model.add(Convolution2D(128, (3,3), 
+                           )                   (inputs)
+    x0 = Convolution2D(32, (5,5),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
-                           ))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+                           )                   (x0)
+    x0 = MaxPooling2D((2, 2), strides=(2, 2))  (x0)
+    x0 = Dropout(0.5)                          (x0)
 
-    model.add(Dropout(0.5))
+    x0 = Convolution2D(64, (3,3),
+                            padding = 'SAME', activation = 'relu',
+                            kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                           )                   (x0)
+    x0 = MaxPooling2D((2, 2), strides=(2, 2))  (x0)
+    x0 = Dropout(0.5)                          (x0)
+    
+    #left (xl) : conv, pooling, conv, pooling ##########################################################
+    xl = Convolution2D(128, (3,3), 
+                            padding = 'SAME', activation = 'relu',
+                            kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                            )                  (x0)
+    xl = MaxPooling2D((2, 2), strides=(2, 2))  (xl)
+    xl = Dropout(0.5)                          (xl)
 
-    model.add(Convolution2D(256, (3,3),
+    xl = Convolution2D(256, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
-                           ))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+                           )                   (xl)
+    xl = MaxPooling2D((2, 2), strides=(2, 2))  (xl)
+    xl = Flatten()                             (xl)
+
+    #right (xr): do nothing  ############################################################################
+    xr = Flatten() (x0)
+
+    #merge left and right  ##############################################################################
+    concat = concatenate([xl, xr])                                         
+    concat = Dense(256, activation = 'relu', kernel_regularizer = l2(reg)) (concat)
+    concat = Dropout(0.5)                                                  (concat)
+    concat = Dense(units = 2, activation = 'softmax')                      (concat)
     
-    model.add(Convolution2D(256, (3,3),
-                            padding = 'SAME', activation = 'relu',
-                            kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
-                           ))
-    model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    
-    model.add(Flatten())       
-    model.add(Dense(128, activation = 'relu', kernel_regularizer = l2(reg)))
-    model.add(Dropout(0.5))       
-    model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(reg)))
+    #create the model ####################################################################################
+    model = Model(inputs=inputs, outputs=concat)
+
 
     #Optimizer          
     opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
@@ -133,7 +152,7 @@ def create_model():
     # Stops the training process upon convergence
     stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
     
-    model.compile(loss=categorical_crossentropy,
+    model.compile(loss=binary_crossentropy,
                   optimizer=opt,
                   metrics=['acc'])
     
@@ -153,14 +172,14 @@ def train(X, Y):
     print(f'Batch_size: {batch_size} \nSteps per epoch: {steps_per_epoch} \n')
     
     
-    model, stop_callback, lr_callback = create_model()
+    model, stop_callback, lr_callback = CreateModel()
     
     np.random.seed(20122018) # Reproducibility + remember the deadline is the 20.12.2018
     
     try:
         model.fit_generator(generate_minibatch_with_arbitrary_rotation(X,Y),
                             steps_per_epoch=steps_per_epoch,
-                            nb_epoch=nb_epoch,
+                            epochs=epochs,
                             verbose=1,
                             callbacks=[lr_callback, stop_callback])
     except KeyboardInterrupt:

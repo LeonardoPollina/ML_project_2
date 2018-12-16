@@ -19,7 +19,7 @@ pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 40
+epochs = 40
 batch_size = 125
 steps_per_epoch = 250 #the number of training samples is huge, arbitrary value
 
@@ -86,7 +86,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
 ###########              MODEL CREATION              ##########################
 ###############################################################################
 
-def create_model():
+def CreateModel():
     '''Create a sequential model'''        
     model = Sequential()
     
@@ -165,14 +165,14 @@ def train(X, Y):
     print(f'Batch_size: {batch_size} \nSteps per epoch: {steps_per_epoch} \n')
     
     
-    model, stop_callback, lr_callback = create_model()
+    model, stop_callback, lr_callback = CreateModel()
     
     np.random.seed(20122018) # Reproducibility + remember the deadline is the 20.12.2018
     
     try:
         model.fit_generator(generate_minibatch_with_arbitrary_rotation(X,Y),
                             steps_per_epoch=steps_per_epoch,
-                            nb_epoch=nb_epoch,
+                            epochs=epochs,
                             verbose=1,
                             callbacks=[lr_callback, stop_callback])
     except KeyboardInterrupt:

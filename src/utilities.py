@@ -131,7 +131,21 @@ def split_data(x, y, ratio, seed=1):
 ################################################################################
 ####################### OUR FUNCTIONS ##########################################
 ################################################################################
-
+def get_idx_split_data(N, ratio, seed=1):
+    """
+    Split the dataset based on the split ratio. N is the number of data that 
+    we have.
+    Return the indices of the train/validation set.
+    """
+    #Set seed
+    np.random.seed(seed)
+    idx_permuted = np.random.permutation(np.arange(N))
+    #Used to compute how many samples correspond to the desired ratio.
+    limit = int(N*ratio)
+    idx_tr = idx_permuted[:limit]
+    idx_te = idx_permuted[(limit+1):]
+    return idx_tr, idx_te
+    
 def MY_masks_to_submission(submission_filename, masks1D):
     """ Converts the matrix containing all the labels into a submission file.
         
@@ -262,17 +276,17 @@ def crop_center(img,cropx,cropy):
     return img[starty:starty+cropy,startx:startx+cropx]    
 
 
-def LoadImages(pad_size, root_dir = "../Data/training/", verbose = 1):
+def LoadImages(pad_size, root_dir = "../Data/", verbose = 1):
     ''' Load images and pad them using mirror boundary conditions
     '''
     # Load a set of image
-    image_dir = root_dir + "images/"
+    image_dir = root_dir + "/training/images/"
     files = os.listdir(image_dir)
     n = len(files)
     if verbose : print("Loading " + str(n) + " images")
     imgs = [load_image(image_dir + files[i]) for i in range(n)]
 
-    gt_dir = root_dir + "groundtruth/"
+    gt_dir = root_dir + "/training/groundtruth/"
     if verbose : print("Loading " + str(n) + " groundtruth images")
     gt_imgs = [load_image(gt_dir + files[i]) for i in range(n)]
 

@@ -1,6 +1,4 @@
-# Functions to generate the model with arbitrary rotations
-# 2 neurons at the end
-# 3 dropouts in total
+# Functions to generate the model with arbitrary rotations, with 2 nodes at the end
 
 from somefunctions import *
 from f1_score import *
@@ -15,14 +13,14 @@ pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
 input_size = 64
-pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
+pad_size = int(input_size/2 - patch_size/2)
 
 
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 45
+epochs = 45
 batch_size = 250
 steps_per_epoch = 125 #the number of training samples is huge, arbitrary value
 
@@ -34,8 +32,8 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'model_2c_Weights'
-SubmissionName = 'model_2c_Submission.csv'
+NameWeights = 'model_2b_Weights'
+SubmissionName = 'model_2b_Submission.csv'
 
 
 
@@ -88,7 +86,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
 ###########              MODEL CREATION              ##########################
 ###############################################################################
 
-def create_model():
+def CreateModel():
     '''Create a sequential model'''        
     model = Sequential()
     
@@ -101,11 +99,12 @@ def create_model():
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
     model.add(Convolution2D(64, (3,3), 
+                            input_shape = ( input_size, input_size, 3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-    model.add(Dropout(0.5))
+    
     model.add(Convolution2D(128, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
@@ -138,7 +137,7 @@ def create_model():
     
     model.compile(loss=categorical_crossentropy,
                   optimizer=opt,
-                  metrics=['acc'])
+                  metrics=['acc', f1_score])
     
     return model, stop_callback, lr_callback
 
@@ -156,14 +155,14 @@ def train(X, Y):
     print(f'Batch_size: {batch_size} \nSteps per epoch: {steps_per_epoch} \n')
     
     
-    model, stop_callback, lr_callback = create_model()
+    model, stop_callback, lr_callback = CreateModel()
     
     np.random.seed(20122018) # Reproducibility + remember the deadline is the 20.12.2018
     
     try:
         model.fit_generator(generate_minibatch_with_arbitrary_rotation(X,Y),
                             steps_per_epoch=steps_per_epoch,
-                            nb_epoch=nb_epoch,
+                            epochs=epochs,
                             verbose=1,
                             callbacks=[lr_callback, stop_callback])
     except KeyboardInterrupt:

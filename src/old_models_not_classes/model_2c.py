@@ -1,3 +1,7 @@
+# Functions to generate the model with arbitrary rotations
+# 2 neurons at the end
+# 3 dropouts in total
+
 from somefunctions import *
 from f1_score import *
 import scipy
@@ -10,7 +14,7 @@ import scipy
 pool_size = (2, 2)
 train_shape = 400 #size of the training images
 patch_size = 16
-input_size = 72
+input_size = 64
 pad_size = int(input_size/2 - patch_size/2)
 pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 
@@ -18,7 +22,7 @@ pad_rotate_size = int( input_size / np.sqrt(2) ) + 2
 # Training parameters
 reg = 1e-5  #regularization term
 learning_rate = 0.001
-nb_epoch = 40
+epochs = 45
 batch_size = 250
 steps_per_epoch = 125 #the number of training samples is huge, arbitrary value
 
@@ -30,9 +34,8 @@ BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
 
 
 #Other stuff
-NameWeights = 'model_3_72_Weights'
-SubmissionName = 'model_3_72_Submission.csv'
-PredictionName = 'prediction_72_model3'
+NameWeights = 'model_2c_Weights'
+SubmissionName = 'model_2c_Submission.csv'
 
 
 
@@ -85,7 +88,7 @@ def generate_minibatch_with_arbitrary_rotation(X,Y):
 ###########              MODEL CREATION              ##########################
 ###############################################################################
 
-def create_model():
+def CreateModel():
     '''Create a sequential model'''        
     model = Sequential()
     
@@ -97,15 +100,13 @@ def create_model():
     
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Convolution2D(128, (3,3), 
+    model.add(Convolution2D(64, (3,3), 
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-
     model.add(Dropout(0.5))
-
-    model.add(Convolution2D(256, (3,3),
+    model.add(Convolution2D(128, (3,3),
                             padding = 'SAME', activation = 'relu',
                             kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
                            ))
@@ -117,10 +118,12 @@ def create_model():
                            ))
     model.add(MaxPooling2D((2, 2), strides=(2, 2)))
     
-    model.add(Flatten())       
-    model.add(Dense(128, activation = 'relu', kernel_regularizer = l2(reg)))
+    model.add(Flatten())
+    model.add(Dense(512, activation = 'relu', kernel_regularizer = l2(reg)))
+    model.add(Dropout(0.5))         
+    model.add(Dense(256, activation = 'relu', kernel_regularizer = l2(reg)))
     model.add(Dropout(0.5))       
-    model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(reg)))
+    model.add(Dense(units = 2, activation = 'softmax'))
 
     #Optimizer          
     opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
@@ -153,14 +156,14 @@ def train(X, Y):
     print(f'Batch_size: {batch_size} \nSteps per epoch: {steps_per_epoch} \n')
     
     
-    model, stop_callback, lr_callback = create_model()
+    model, stop_callback, lr_callback = CreateModel()
     
     np.random.seed(20122018) # Reproducibility + remember the deadline is the 20.12.2018
     
     try:
         model.fit_generator(generate_minibatch_with_arbitrary_rotation(X,Y),
                             steps_per_epoch=steps_per_epoch,
-                            nb_epoch=nb_epoch,
+                            epochs=epochs,
                             verbose=1,
                             callbacks=[lr_callback, stop_callback])
     except KeyboardInterrupt:
