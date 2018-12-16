@@ -2,7 +2,10 @@ import numpy as np
 import os
 import matplotlib.image as mpimg
 import matplotlib.pyplot as plt
-
+import pickle
+from PIL import Image
+from sklearn.metrics import f1_score as f1_score_sklearn
+import scipy
 
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Activation, Flatten
@@ -15,12 +18,16 @@ from keras.layers import LeakyReLU
 from keras.callbacks import ReduceLROnPlateau, EarlyStopping
 from keras.losses import binary_crossentropy, categorical_crossentropy
 from keras import initializers as K_init
+from keras.layers import Input, concatenate
+from keras.models import Model
+from keras.layers import BatchNormalization
 
-#########################################################################################
-##################### GIVEN FUNCTIONS ###################################################
-#########################################################################################
+################################################################################
+##################### GIVEN FUNCTIONS ##########################################
+################################################################################
 
-foreground_threshold = 0.25 # percentage of pixels > 1 required to assign a foreground label to a patch
+# percentage of pixels > 1 required to assign a foreground label to a patch
+foreground_threshold = 0.25 
 
 def load_image(infilename):
     data = mpimg.imread(infilename)
@@ -82,22 +89,6 @@ def label_to_img(imgwidth, imgheight, w, h, labels):
             idx = idx + 1
     return im
 
-def concatenate_images(img, gt_img):
-    nChannels = len(gt_img.shape)
-    w = gt_img.shape[0]
-    h = gt_img.shape[1]
-    if nChannels == 3:
-        cimg = np.concatenate((img, gt_img), axis=1)
-    else:
-        gt_img_3c = np.zeros((w, h, 3), dtype=np.uint8)
-        gt_img8 = img_float_to_uint8(gt_img)          
-        gt_img_3c[:,:,0] = gt_img8
-        gt_img_3c[:,:,1] = gt_img8
-        gt_img_3c[:,:,2] = gt_img8
-        img8 = img_float_to_uint8(img)
-        cimg = np.concatenate((img8, gt_img_3c), axis=1)
-    return cimg
-
 # assign a label to a patch
 def patch_to_label(patch):
     df = np.mean(patch)
@@ -106,9 +97,17 @@ def patch_to_label(patch):
     else:
         return 0
 
-#########################################################################################
-####################### OUR FUNCTIONS ###################################################
-#########################################################################################
+def make_img_overlay(img, predicted_img):
+    w = img.shape[0]
+    h = img.shape[1]
+    color_mask = np.zeros((w, h, 3), dtype=np.uint8)
+    color_mask[:,:,0] = predicted_img*255
+
+    img8 = img_float_to_uint8(img)
+    background = Image.fromarray(img8, 'RGB').convert("RGBA")
+    overlay = Image.fromarray(color_mask, 'RGB').convert("RGBA")
+    new_img = Image.blend(background, overlay, 0.2)
+    return new_img
 
 def split_data(x, y, ratio, seed=1):
     """
@@ -129,6 +128,9 @@ def split_data(x, y, ratio, seed=1):
     y_te = yrand[(limit+1):]
     return x_tr, x_te, y_tr, y_te
 
+################################################################################
+####################### OUR FUNCTIONS ##########################################
+################################################################################
 
 def MY_masks_to_submission(submission_filename, masks1D):
     """ Converts the matrix containing all the labels into a submission file.
@@ -258,3 +260,42 @@ def crop_center(img,cropx,cropy):
     startx = x//2-(cropx//2)
     starty = y//2-(cropy//2)    
     return img[starty:starty+cropy,startx:startx+cropx]    
+
+
+def LoadImages(pad_size, root_dir = "../Data/training/", verbose = 1):
+    ''' Load images and pad them using mirror boundary conditions
+    '''
+    # Load a set of image
+    image_dir = root_dir + "images/"
+    files = os.listdir(image_dir)
+    n = len(files)
+    if verbose : print("Loading " + str(n) + " images")
+    imgs = [load_image(image_dir + files[i]) for i in range(n)]
+
+    gt_dir = root_dir + "groundtruth/"
+    if verbose : print("Loading " + str(n) + " groundtruth images")
+    gt_imgs = [load_image(gt_dir + files[i]) for i in range(n)]
+
+    if verbose : print('Padding images using pad of: ', pad_size)
+    imgs = padding_imgs(np.array(imgs),pad_size)
+    gt_imgs = padding_GT(np.array(gt_imgs),pad_size)
+    
+    if verbose : print('Shape of imgs: ',imgs.shape)
+    if verbose : print('Shape of gt_imgs: ',imgs.shape)
+    return imgs, gt_imgs
+
+def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, PLOT = True):
+    ''' Load the predicion of the model, saved in a file called PredictionName 
+        and return the image with the prediction.
+        If PLOT is true we generate also a plot of the prediction
+    '''
+    # Getting back the prediction:
+    with open(PredictionName, 'rb') as f: 
+        predicted_labels_1D = pickle.load(f)
+    predicted_labels = predicted_labels_1D.reshape(50,-1)
+
+    # Get the labels related to image IDX and create an image
+    im = label_to_img(img_size, img_size, patch_size, patch_size, predicted_labels[IDX])
+
+    if PLOT: plt.imshow(im)
+    return im
