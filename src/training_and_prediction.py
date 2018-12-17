@@ -46,7 +46,7 @@ def train(X, Y, MODEL, validation_ratio = -1):
         X_tr, X_val, Y_tr, Y_val = split_data(X, Y, validation_ratio, seed = 1)
         print('Training images shape: ', X_tr.shape) 
         print('Validation images shape: ', X_val.shape) 
-        print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size} \n')
+        print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}\n\n')
         try:
             model.fit_generator(MODEL.MinibatchGenerator(X_tr,Y_tr),

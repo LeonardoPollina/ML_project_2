@@ -326,7 +326,7 @@ def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
     gt_imgs = padding_GT(np.array(gt_imgs),pad_size)
     # Print some infos
     if verbose : print('Shape of imgs: ',imgs.shape)
-    if verbose : print('Shape of gt_imgs: ',imgs.shape)
+    if verbose : print('Shape of gt_imgs: ',gt_imgs.shape)
 
     return imgs, gt_imgs
 
