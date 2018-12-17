@@ -211,27 +211,6 @@ def padding_GT(imgs,pad_size):
             X[i] = np.pad(imgs[i],pad_size,'reflect')
     return X
 
-
-#I THINK THAT WE DON'T USE THIS FUNCTION
-# def imgs_to_patches(imgs, img_size, patch_size, input_size):
-#     ''' Takes an array of images (both 1 or 3 channels) and outputs an array 
-#     with the patches of (input_size x input_size) centered around the patches of 16x16
-#     '''
-#     pad_size = int(input_size/2 - patch_size/2)
-#     patches = []
-#     for idx in range(imgs.shape[0]):
-#         im = imgs[idx]
-#         for i in range(0,img_size,patch_size):
-#             for j in range(0,img_size,patch_size):
-#                 temp = im[j:j+patch_size, i:i+patch_size, :]
-#                 temp = temp.reshape(1,patch_size,patch_size,3)
-#                 temp = padding_imgs(temp,pad_size)
-#                 temp = temp.reshape(input_size,input_size,3)
-#                 patches.append(temp)
-#     return np.asarray(patches)
-
-
-
 def imgs_to_inputs(imgs, img_size, patch_size, input_size):
     ''' Takes an array of properly padded images and outputs an array with
     patches of dimensions (input_size x input_size). These patches will be
@@ -346,3 +325,102 @@ def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, PLOT = T
 
     if PLOT: plt.imshow(im)
     return im
+
+
+################################################################################
+######################   POST-PROCESSING    ####################################
+################################################################################
+
+
+def is_foregroungund_surrounded(predicted_image, T):
+    '''Take an image and convert foreground patches into street if they are 
+    surrounded by at least T street patches.
+    
+    Image is a 2D array containing the patches.
+    '''
+    nbr_patches = predicted_image.shape[0]
+    for row in range(1,nbr_patches-1):
+        for col in range (1,nbr_patches-1): 
+            # Looking at the label of my_patch's neighbors
+            nghb_left = predicted_image[col,row-1];
+            nghb_right = predicted_image[col,row+1];
+            nghb_up = predicted_image[col-1,row];
+            nghb_down = predicted_image[col+1,row];
+            nghb_up_left = predicted_image[col-1,row-1];
+            nghb_up_right = predicted_image[col-1,row+1];
+            nghb_down_left = predicted_image[col+1,row-1];
+            nghb_down_right = predicted_image[col+1,row+1];
+
+            # There are 8 neighbors for patches not on the border
+            neighbors = np.array([nghb_left,nghb_right,nghb_up,nghb_down,nghb_up_left,nghb_up_right,nghb_down_left,nghb_down_right])
+
+            nbr_labels_street_nghb = np.sum(neighbors)
+
+            if(nbr_labels_street_nghb >= T):
+                predicted_image[col,row] = 1
+    return predicted_image
+
+
+def is_street(predicted_image, L, T):
+    '''Check if a patch belongs to horizontal and vertical streets.
+    
+    The criterium is the following: we select a patch and take the first L 
+    neighbouring patches for a total of 2L patches in one direction. If there
+    are more than T street patches we turn the current patch into street.
+    '''
+    nbr_patches = predicted_image.shape[0]    
+    # Horizontal streets
+    for row in range(L,nbr_patches-L):
+        for col in range (nbr_patches): 
+            nghb_left = predicted_image[col,row-L-1:row-1]
+            nghb_right = predicted_image[col,row+1:row+L+1]
+            is_horizontal_street = (nghb_left.sum() + nghb_right.sum() ) >= T
+            if(is_horizontal_street):
+                predicted_image[col,row] = 1
+    
+    # Vertical streets
+    for row in range(nbr_patches):
+        for col in range (L,nbr_patches-L):   
+            nghb_up = predicted_image[col-L-1:col-1,row]
+            nghb_down = predicted_image[col+1:col+L+1,row]
+            is_vertical_street = (nghb_down.sum() + nghb_up.sum() ) >= T  
+            if( is_vertical_street):
+                predicted_image[col,row] = 1
+                
+    return predicted_image
+
+
+def post_process_single(predicted_image):
+    ''' Post processing routine for a single image
+    '''
+    nbr_patches = predicted_image.shape[0]
+    predicted_image = is_street(predicted_image, 4, 6)
+    predicted_image = is_foregroungund_surrounded(predicted_image, 7)
+    predicted_image = is_street(predicted_image, 7, 12)
+    predicted_image = is_foregroungund_surrounded(predicted_image, 8)
+    return predicted_image
+
+def post_process_and_submit(PredictionName, SubmissionName, verbose = 1):
+    '''Load the prediction from a (pickle) file called PredictionName and 
+    generate a submission file called SubmissionName
+    '''
+    # Getting back the prediction:
+    if verbose: print('Recovering prediction from: ', PredictionName)
+    with open(PredictionName, 'rb') as f: 
+        test_predicted_1D = pickle.load(f)
+    test_labels = test_predicted_1D.reshape(50,-1)
+    
+    if verbose:
+        print('Recovered! Shape: ', test_labels.shape)
+        print('Post processing...')
+    
+    # Post processing
+    post_processed_labels = np.empty((50,38*38))
+    for i in range(50):
+        patches_38x38 = test_labels[i].reshape(38,38)
+        post_processed_labels[i] = post_process_single(patches_38x38).reshape(38*38)
+    if verbose: print('Generating submission...')
+    MY_masks_to_submission(SubmissionName, post_processed_labels)
+    if verbose: print('Submission saved in: ', SubmissionName)
+
+    return
