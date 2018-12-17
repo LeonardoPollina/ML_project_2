@@ -18,7 +18,7 @@ class MODEL_CLASS:
         # Training parameters 
         self.learning_rate = 0.001
         self.epochs = 40
-        self.batch_size = 128
+        self.batch_size = 125
         self.steps_per_epoch = 250
 
 
@@ -53,8 +53,8 @@ class MODEL_CLASS:
             # We want to select randomly the patches inside the images. So we will
             # select a random pixel in the image and crop around it a square of the
             # correct size. To be able to crop we select pixels in between low and high
-            low=input_size//2
-            high = (train_shape + 2*pad_size - input_size//2)
+            low = self.input_size//2
+            high = (self.train_shape + 2*self.pad_size - self.input_size//2)
 
             for i in range(self.batch_size):
                 # Select a random image
