@@ -145,7 +145,7 @@ class MODEL_CLASS:
         print('\tpatch_size = ', self.patch_size)
         print('\tinput_size = ', self.input_size)
         print('\tpad_size = ', int(self.input_size/2 - self.patch_size/2))
-        print('\tpad_rotate_size = ', int( self.input_size / np.sqrt(2) ) + 2)
+        print('\tpad_rotate_size = ', self.pad_rotate_size)
         print('\tfinal_layer_units = ', self.final_layer_units)
         print('\tpool_size = ', self.pool_size)
 

@@ -53,8 +53,8 @@ class MODEL_CLASS:
             # We want to select randomly the patches inside the images. So we will
             # select a random pixel in the image and crop around it a square of the
             # correct size. To be able to crop we select pixels in between low and high
-            low=self.pad_rotate_size + self.patch_size // 2
-            high = self.pad_rotate_size + self.train_shape - self.patch_size // 2
+            low=input_size//2
+            high = (train_shape + 2*pad_size - input_size//2)
 
             for i in range(self.batch_size):
                 # Select a random image
@@ -139,7 +139,7 @@ class MODEL_CLASS:
         print('\tpatch_size = ', self.patch_size)
         print('\tinput_size = ', self.input_size)
         print('\tpad_size = ', int(self.input_size/2 - self.patch_size/2))
-        print('\tpad_rotate_size = ', int( self.input_size / np.sqrt(2) ) + 2)
+        print('\tpad_rotate_size = ', self.pad_size)
         print('\tfinal_layer_units = ', self.final_layer_units)
         print('\tpool_size = ', self.pool_size)
 
