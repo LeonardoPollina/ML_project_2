@@ -28,7 +28,7 @@ def train(X, Y, MODEL, validation_ratio = -1):
         print('Training images shape: ', X.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}')
-        print('No validation data.')
+        print('No validation data.\n\n')
         try:
             model.fit_generator(MODEL.MinibatchGenerator(X,Y),
                                 steps_per_epoch=MODEL.steps_per_epoch,
@@ -46,7 +46,8 @@ def train(X, Y, MODEL, validation_ratio = -1):
         X_tr, X_val, Y_tr, Y_val = split_data(X, Y, validation_ratio, seed = 1)
         print('Training images shape: ', X_tr.shape) 
         print('Validation images shape: ', X_val.shape) 
-        print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size} \nSteps per epoch: {MODEL.steps_per_epoch}')
+        print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size} \n')
+        print(f'Steps per epoch: {MODEL.steps_per_epoch}\n\n')
         try:
             model.fit_generator(MODEL.MinibatchGenerator(X_tr,Y_tr),
                                 steps_per_epoch=MODEL.steps_per_epoch,
@@ -94,7 +95,7 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont, validation_ratio =
         print('Training images shape: ', X.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}')
-        print('No validation data.')
+        print('No validation data.\n\n')
         try:
             model.fit_generator(MODEL.MinibatchGenerator(X,Y),
                                 steps_per_epoch=MODEL.steps_per_epoch,
@@ -113,7 +114,7 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont, validation_ratio =
         print('Training images shape: ', X_tr.shape) 
         print('Validation images shape: ', X_val.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
-        print(f'Steps per epoch: {MODEL.steps_per_epoch}')
+        print(f'Steps per epoch: {MODEL.steps_per_epoch}\n\n')
         try:
             model.fit_generator(MODEL.MinibatchGenerator(X_tr,Y_tr),
                                 steps_per_epoch=MODEL.steps_per_epoch,
@@ -158,7 +159,7 @@ def ComputeLocalF1Score(X, Y, MODEL, NameWeights):
     print('Number of validation images: ', N_valid)
 
     #Create suitable input/labels for the model
-    val_inputs = imgs_to_windows(X, MODEL.train_shape, MODEL.patch_size, 
+    val_inputs = imgs_to_inputs(X, MODEL.train_shape, MODEL.patch_size, 
                                 MODEL.input_size)
     val_gt_patches = [img_crop(Y[i], MODEL.patch_size, MODEL.patch_size) 
                         for i in range(N_valid)]
@@ -196,7 +197,7 @@ def PredictAndSubmit(MODEL, NameWeights, SubmissionName, PredictionName,
     test_images = padding_imgs(np.array(test_images),MODEL.pad_size)
     
     # Prepare the input for the prediction
-    test_inputs = imgs_to_windows(test_images, 608, MODEL.patch_size,
+    test_inputs = imgs_to_inputs(test_images, 608, MODEL.patch_size,
                                 MODEL.input_size)
     print('Inputs for the test are ready. Shape: ', test_inputs.shape)
     
@@ -236,7 +237,7 @@ def PredictAndPlot(img, MODEL, NameWeights, PLOT = True):
     dim = img.shape[0]
     img_reshaped = img.reshape((1,dim,dim,3))
     img_reshaped = padding_imgs(img_reshaped,MODEL.pad_size)
-    inputs = imgs_to_windows(img_reshaped,dim,MODEL.patch_size,MODEL.input_size)
+    inputs = imgs_to_inputs(img_reshaped,dim,MODEL.patch_size,MODEL.input_size)
     prediction = model.predict(inputs)
     if MODEL.final_layer_units == 1:
         predicted_labels = ( (prediction > 0.5) * 1 ).flatten()

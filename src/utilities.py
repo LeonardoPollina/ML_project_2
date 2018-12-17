@@ -134,8 +134,8 @@ def split_data(x, y, ratio, seed=1):
 def get_idx_split_data(N, ratio, seed=1):
     """
     Split the dataset based on the split ratio. N is the number of data that 
-    we have.
-    Return the indices of the train/validation set.
+    we want to split.
+    Return random indices to select the train/validation set.
     """
     #Set seed
     np.random.seed(seed)
@@ -147,22 +147,23 @@ def get_idx_split_data(N, ratio, seed=1):
     return idx_tr, idx_te
     
 def MY_masks_to_submission(submission_filename, masks1D):
-    """ Converts the matrix containing all the labels into a submission file.
-        
-        masks1D should be a 2D array, where the ith row contains the labels of the ith test image.
-    """
+    ''' Converts the matrix containing all the labels into a submission file.
+    This function relies on the function MY_mask_to_submission_strings
+  
+    NOTE: masks1D should be a 2D array, where the ith row contains the labels of 
+    the ith test image.
+    '''
     with open(submission_filename, 'w') as f:
         f.write('id,prediction\n')
         for idx,fn in enumerate(masks1D):
             f.writelines('{}\n'.format(s) for s in MY_mask_to_submission_strings(fn,idx))
       
     
-def MY_mask_to_submission_strings(mask1D, fileNumber):
+def MY_mask_to_submission_strings(mask1D, img_number):
     '''To be called inside MY_masks_to_submission.
-    
-        Write the informations of the image fileNumber, starting from the array of labels.
+    Write the informations of the image img_number, starting from the 1D array 
+    containing the predicted labels of the image.
     '''
-    img_number = fileNumber
     patch_size = 16
     test_size = 608
     im = label_to_img(test_size, test_size, patch_size, patch_size, mask1D)
@@ -174,13 +175,13 @@ def MY_mask_to_submission_strings(mask1D, fileNumber):
 
             
 def pick_test_images(root = '../Data'):
-    ''' Pick the images for the submission 
+    ''' Pick the images, located in the root directory. 
     '''
     test_imgs = []
     for i in range(1, 51):
         name = root + '/test_set_images/test_'+str(i)+'/test_' + str(i) + '.png'
         test_imgs.append(load_image(name))
-    return test_imgs
+    return np.asarray(test_imgs)
     
     
 def padding_imgs(imgs,pad_size):
@@ -200,7 +201,7 @@ def padding_imgs(imgs,pad_size):
 
 
 def padding_GT(imgs,pad_size):
-    ''' Pad an array of groundtruth images using NumPy
+    ''' Pad an array of 1 channel images using NumPy
     '''
     length_padded_image = imgs.shape[1] + 2*pad_size
     height_padded_image = imgs.shape[2] + 2*pad_size
@@ -211,40 +212,64 @@ def padding_GT(imgs,pad_size):
     return X
 
 
-def imgs_to_patches(imgs, img_size, patch_size, input_size):
-    ''' Takes an array of images and outputs an array with the patches of (input_size x input_size) centered around the patches of 16x16
+#I THINK THAT WE DON'T USE THIS FUNCTION
+# def imgs_to_patches(imgs, img_size, patch_size, input_size):
+#     ''' Takes an array of images (both 1 or 3 channels) and outputs an array 
+#     with the patches of (input_size x input_size) centered around the patches of 16x16
+#     '''
+#     pad_size = int(input_size/2 - patch_size/2)
+#     patches = []
+#     for idx in range(imgs.shape[0]):
+#         im = imgs[idx]
+#         for i in range(0,img_size,patch_size):
+#             for j in range(0,img_size,patch_size):
+#                 temp = im[j:j+patch_size, i:i+patch_size, :]
+#                 temp = temp.reshape(1,patch_size,patch_size,3)
+#                 temp = padding_imgs(temp,pad_size)
+#                 temp = temp.reshape(input_size,input_size,3)
+#                 patches.append(temp)
+#     return np.asarray(patches)
+
+
+
+def imgs_to_inputs(imgs, img_size, patch_size, input_size):
+    ''' Takes an array of properly padded images and outputs an array with
+    patches of dimensions (input_size x input_size). These patches will be
+    overlapped, but their central portions of size (patch_size x patch_size) 
+    will not.
+
+    Basically, instead of extracting the patches from the images and then pad 
+    them, this function allows to extract patches of the desired dimension,
+    centered around the non overlapped patches of dimensions 
+    (patch_size x patch_size) that would fit in the original image.
     '''
-    pad_size = int(input_size/2 - patch_size/2)
-    patches = []
+    inputs = []
+    # For each padded image
     for idx in range(imgs.shape[0]):
         im = imgs[idx]
-        for i in range(0,img_size,patch_size):
-            for j in range(0,img_size,patch_size):
-                temp = im[j:j+patch_size, i:i+patch_size, :]
-                temp = temp.reshape(1,patch_size,patch_size,3)
-                temp = padding_imgs(temp,pad_size)
-                temp = temp.reshape(input_size,input_size,3)
-                patches.append(temp)
-    return np.asarray(patches)
 
-
-
-def imgs_to_windows(imgs, img_size, patch_size, window_size):
-    ''' Takes an array of padded images and outputs an array with the windows of (window_size x window_size) centered around the patches
-    '''
-    windows = []
-    for idx in range(imgs.shape[0]):
-        im = imgs[idx]
+        # Crop patches of (input_size x input_size), centered around the patches
+        # of (patch_size x patch_size) that would fit in the original image
         for i in range(img_size//patch_size):
             for j in range(img_size//patch_size):
-                temp = im[j*patch_size:window_size + j*patch_size,
-                                  i*patch_size:window_size + i*patch_size]
-                windows.append(temp)
-    return np.asarray(windows)
+                temp = im[j*patch_size:input_size + j*patch_size,
+                          i*patch_size:input_size + i*patch_size]
+                inputs.append(temp)
+
+    return np.asarray(inputs)
 
 
-def data_augmentation(X, rot_flag, flip_flag, bright_flag):
-    '''Data augmentation on X, element of size (input_size * input_size * 3)'''
+def data_augmentation(X, rot_flag, flip_flag, bright_flag, 
+                      bright_range = 0.3, contr_range = 0.25):
+    '''Data augmentation on X, element of size (input_size * input_size * 3).
+
+    rot_flag: randomly add 0, 1, 2 or 3 rotations of 90° to X
+    flip_flag: randomly decide to (or not to) flip X vertically or horizontally.
+    bright_flag: randomly change constrast and brightness of the input X. The
+        default ranges of contrast and brightness are decided based on several
+        training results and on heuristic considerations. If the parameters are 
+        too high, the images becomes not recognizable.
+    '''
     #flip
     if flip_flag:
         flip_decision = np.random.choice(3)
@@ -260,13 +285,18 @@ def data_augmentation(X, rot_flag, flip_flag, bright_flag):
     
     #contrast and brightness
     if bright_flag:
-        brightness = np.random.rand()*0.3 - 0.15
-        contrast = np.random.rand()*0.25 - 0.125
+        brightness = np.random.rand()*bright_range - (bright_range/2)
+        contrast = np.random.rand()*contr_range - (contr_range/2)
         X = np.clip( X * (contrast/0.5+1) - contrast + brightness, 0, 1)
         
     return X
 
-def crop_center(img,cropx,cropy):
+def crop_center(img, cropx, cropy):
+    ''' Crop a patch from img. Centered in the middle of the image and of 
+    dimensions (cropx x cropy). Works both for 1 and 3 channel images.
+
+    This function is used after a rotation of an arbitrary degree.
+    '''
     if len(img.shape) == 3:
         y,x, _ = img.shape
     if len(img.shape) == 2:
@@ -276,32 +306,35 @@ def crop_center(img,cropx,cropy):
     return img[starty:starty+cropy,startx:startx+cropx]    
 
 
-def LoadImages(pad_size, root_dir = "../Data/", verbose = 1):
-    ''' Load images and pad them using mirror boundary conditions
+def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
+    ''' Load images and pad them using mirror boundary conditions. If pad_size
+    is zero, then the images are not padded.
     '''
-    # Load a set of image
+    # Load images
     image_dir = root_dir + "/training/images/"
     files = os.listdir(image_dir)
     n = len(files)
     if verbose : print("Loading " + str(n) + " images")
     imgs = [load_image(image_dir + files[i]) for i in range(n)]
-
+    # Load groundtruth
     gt_dir = root_dir + "/training/groundtruth/"
     if verbose : print("Loading " + str(n) + " groundtruth images")
     gt_imgs = [load_image(gt_dir + files[i]) for i in range(n)]
-
+    # Padding
     if verbose : print('Padding images using pad of: ', pad_size)
     imgs = padding_imgs(np.array(imgs),pad_size)
     gt_imgs = padding_GT(np.array(gt_imgs),pad_size)
-    
+    # Print some infos
     if verbose : print('Shape of imgs: ',imgs.shape)
     if verbose : print('Shape of gt_imgs: ',imgs.shape)
+
     return imgs, gt_imgs
 
 def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, PLOT = True):
-    ''' Load the predicion of the model, saved in a file called PredictionName 
-        and return the image with the prediction.
-        If PLOT is true we generate also a plot of the prediction
+    ''' Load the predicion of one model, saved in a (pickle) file called
+    PredictionName and return the IDXth predicted image.
+
+    If PLOT is true we generate also a plot of the prediction.
     '''
     # Getting back the prediction:
     with open(PredictionName, 'rb') as f: 
