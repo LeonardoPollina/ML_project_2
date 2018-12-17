@@ -136,22 +136,17 @@ class MODEL_CLASS:
         model.add(Dropout(0.5))       
         model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(self.reg)))
 
-    #Optimizer          
-    opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
- 
-
-    # This callback reduces the learning rate when the training accuracy does not improve any more
-    lr_callback = ReduceLROnPlateau(monitor='acc', factor=0.5, patience=5,
+        #Optimizer  and callbacks        
+        opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
+        lr_callback = ReduceLROnPlateau(monitor='acc', factor=0.5, patience=5,
                                     verbose=1, mode='auto', min_delta=0.0001, cooldown=0, min_lr=0)
+        stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
     
-    # Stops the training process upon convergence
-    stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
+        model.compile(loss=categorical_crossentropy,
+                    optimizer=opt,
+                    metrics=['acc'])
     
-    model.compile(loss=categorical_crossentropy,
-                  optimizer=opt,
-                  metrics=['acc'])
-    
-    return model, stop_callback, lr_callback
+        return model, stop_callback, lr_callback
 
     ############################################################################
     ###########            PRINT INFORMATIONS            #######################
