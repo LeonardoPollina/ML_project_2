@@ -1,4 +1,16 @@
-# Project Road Segmentation
+# Machine learning project 2 (CS-433)
+### Option 2: Road Segmentation
+
+
+# Required setup/libraries
+The project has been done using `Python 3.6.5`. Morevoer, we rely on various libraries. Here we list the ones that we used:
+* `NumPy 1.14.3`
+* `Scipy 1.1.0`
+* `Scikit-learn 0.19.1'
+* `Keras 2.2.4`
+* `Tensorflow 1.12.0`
+
+Note: `Keras` could be used also with `Theano` as a backend, however, our code is based on `Tensorflow`.
 
 For this choice of project task, we provide a set of satellite images acquired 
 from GoogleMaps. We also provide ground-truth images where each pixel is labeled 
