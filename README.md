@@ -18,12 +18,19 @@ Note: `Keras` could be used also with `Theano` as a backend, however, our code i
     ├── Notebooks                       
     │   ├── qualcosa1                   # commento1
     │   ├── qualcosa2                   # commento2
-    │   └── Logistic regression         # Logistic regression
+    │   └── Logistic_regression.ipynb   # Logistic regression
     └── src
-    │  ├── models                       # Classes that defines the models
+    │  ├── models                       
     │  |   ├── nome_modello_finale      # Final model
     │  |   └── ...                      # Other models
     |  ├── utilities.py                 
     |  ├── logistic_utilities.py
     |  └── training_and_prediction.py
     └── ReadME.md
+
+# Predict
+
+# Content description
+## `Notebooks` folder
+## `utilities.py`
+## `models` folder
