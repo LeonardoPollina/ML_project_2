@@ -32,12 +32,12 @@ We are going to illustrate the structure of the folder and then to describe the 
     │   ├── qualcosa2                   # commento2
     │   └── Logistic_regression.ipynb   # Logistic regression
     └── src
-    │  ├── models                       
-    │  |   ├── nome_modello_finale      # Final model
-    │  |   └── ...                      # Other models
-    |  ├── utilities.py                 
-    |  ├── logistic_utilities.py
-    |  └── training_and_prediction.py
+    │    ├── models                       
+    │    |   ├── nome_modello_finale      # Final model
+    │    |   └── ...                      # Other models
+    |    ├── utilities.py                 
+    |    ├── logistic_utilities.py
+    |    └── training_and_prediction.py
     └── ReadME.md
 
 ## `Notebooks` folder
