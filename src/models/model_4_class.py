@@ -25,7 +25,7 @@ class MODEL_CLASS:
         self.reg = 1e-5  
         self.learning_rate = 0.001
         self.epochs = 40   
-        self.batch_size = 128     
+        self.batch_size = 125     
         self.steps_per_epoch = 250 
 
 
@@ -143,7 +143,7 @@ class MODEL_CLASS:
         model.add(Dense(units = 2, activation = 'softmax', kernel_regularizer = l2(self.reg)))
 
         #Optimizer  and callbacks        
-        opt = Adam(lr=learning_rate) # Adam optimizer with default initial learning rate
+        opt = Adam(lr = self.learning_rate) # Adam optimizer with default initial learning rate
         lr_callback = ReduceLROnPlateau(monitor='acc', factor=0.5, patience=5,
                                     verbose=1, mode='auto', min_delta=0.0001, cooldown=0, min_lr=0)
         stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
