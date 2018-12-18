@@ -24,9 +24,9 @@ class MODEL_CLASS:
         # Training parameters
         self.reg = 1e-5  
         self.learning_rate = 0.001
-        self.epochs = 2
-        self.batch_size = 250
-        self.steps_per_epoch = 125
+        self.epochs = 40
+        self.batch_size = 128
+        self.steps_per_epoch = 250
 
 
         # Data augmentation parameters
@@ -35,9 +35,9 @@ class MODEL_CLASS:
         
 
         #Other stuff
-        self.NameWeights = 'model_1512_Weights'
-        self.SubmissionName = 'model_1512_Submission.csv'
-        self.PredictionName = 'model_1512_prediction'
+        self.NameWeights = 'model_2b_Weights'
+        self.SubmissionName = 'model_2b_Submission.csv'
+        self.PredictionName = 'model_2b_prediction'
 
 
 
