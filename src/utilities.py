@@ -1,3 +1,7 @@
+################################################################################
+##########################    IMPORTS     ######################################
+################################################################################
+
 import numpy as np
 import os
 import matplotlib.image as mpimg
@@ -111,9 +115,11 @@ def make_img_overlay(img, predicted_img):
 
 def split_data(x, y, ratio, seed=1):
     """
-    Split the dataset based on the split ratio. If ratio is 0.8 you will have 80% of your data 
-    set dedicated to training and the rest dedicated to testing. 
-    Return the training then testing sets (x_tr, x_te) and training then testing labels (y_tr, y_te).
+    Split the dataset based on the split ratio. If ratio is 0.8 you will have 
+    80% of your data set dedicated to training and the rest dedicated to 
+    testing. 
+    Return the training then testing sets (x_tr, x_te) and training then testing
+    labels (y_tr, y_te).
     """
     #Set seed
     np.random.seed(seed)
@@ -128,35 +134,45 @@ def split_data(x, y, ratio, seed=1):
     y_te = yrand[(limit+1):]
     return x_tr, x_te, y_tr, y_te
 
+
+
 ################################################################################
 ####################### OUR FUNCTIONS ##########################################
 ################################################################################
+
 def get_idx_split_data(N, ratio, seed=1):
-    """
-    Split the dataset based on the split ratio. N is the number of data that 
-    we want to split.
-    Return random indices to select the train/validation set.
-    """
+    '''Split the dataset based on the split ratio.
+    
+    Parameters:
+    N: the number of data that we need to split
+    ratio: ratio of the splitting
+    seed: numpy random seed selection
+
+    Returns:
+    idx_tr, idx_val: random indices to select the train/validation set.
+    '''
     #Set seed
     np.random.seed(seed)
     idx_permuted = np.random.permutation(np.arange(N))
     #Used to compute how many samples correspond to the desired ratio.
     limit = int(N*ratio)
     idx_tr = idx_permuted[:limit]
-    idx_te = idx_permuted[(limit+1):]
-    return idx_tr, idx_te
+    idx_val = idx_permuted[(limit+1):]
+    return idx_tr, idx_val
     
 def MY_masks_to_submission(submission_filename, masks1D):
     ''' Converts the matrix containing all the labels into a submission file.
-    This function relies on the function MY_mask_to_submission_strings
-  
-    NOTE: masks1D should be a 2D array, where the ith row contains the labels of 
-    the ith test image.
+    
+    Parameters: 
+    submission_filename: name of the file that will contain the submission
+    masks1D: 2-dimensional np array. The ith row contains the labels of 
+        the ith test image
     '''
     with open(submission_filename, 'w') as f:
         f.write('id,prediction\n')
         for idx,fn in enumerate(masks1D):
-            f.writelines('{}\n'.format(s) for s in MY_mask_to_submission_strings(fn,idx))
+            f.writelines('{}\n'.format(s) for s in 
+                                        MY_mask_to_submission_strings(fn,idx))
       
     
 def MY_mask_to_submission_strings(mask1D, img_number):
@@ -174,18 +190,32 @@ def MY_mask_to_submission_strings(mask1D, img_number):
             yield("{:03d}_{}_{},{}".format(img_number+1, j, i, label))
 
             
-def pick_test_images(root = '../Data'):
+def pick_test_images(root_dir = '../Data'):
     ''' Pick the images, located in the root directory. 
+
+    Parameters:
+    root_dir: folder containining the training images and the set images
+
+    Returns:
+    test_imgs: np array containing the test images
     '''
     test_imgs = []
     for i in range(1, 51):
-        name = root + '/test_set_images/test_'+str(i)+'/test_' + str(i) + '.png'
+        name = root_dir + '/test_set_images/test_' + str(i) + '/test_' + 
+                str(i) + '.png'
         test_imgs.append(load_image(name))
     return np.asarray(test_imgs)
     
     
 def padding_imgs(imgs,pad_size):
-    ''' Pad an array of RGB images using NumPy
+    ''' Pad an array of RGB images using NumPy. Mirror boundary conditions.
+
+    Parameters:
+    imgs: 4 dimensional np array. Each element contains an RGB image
+    pad_size: padding size
+
+    Returns:
+    X: 4 dimensional np array. Each element contains the padded RGB image
     '''
     length_padded_image = imgs.shape[1] + 2*pad_size
     height_padded_image = imgs.shape[2] + 2*pad_size
@@ -201,7 +231,14 @@ def padding_imgs(imgs,pad_size):
 
 
 def padding_GT(imgs,pad_size):
-    ''' Pad an array of 1 channel images using NumPy
+    ''' Pad an array of 1 channel images using NumPy.
+
+    Parameters:
+    imgs: 3 dimensional np array. Each element contains a 1 channel image
+    pad_size: padding size
+
+    Returns:
+    X: 3 dimensional np array. Each element contains the padded image
     '''
     length_padded_image = imgs.shape[1] + 2*pad_size
     height_padded_image = imgs.shape[2] + 2*pad_size
@@ -212,15 +249,25 @@ def padding_GT(imgs,pad_size):
     return X
 
 def imgs_to_inputs(imgs, img_size, patch_size, input_size):
-    ''' Takes an array of properly padded images and outputs an array with
+    '''Get an array of patches of (input_size x input_size) from the images,
+    used by the models.
+    
+    Takes an array of properly padded images and outputs an array with
     patches of dimensions (input_size x input_size). These patches will be
     overlapped, but their central portions of size (patch_size x patch_size) 
     will not.
-
     Basically, instead of extracting the patches from the images and then pad 
     them, this function allows to extract patches of the desired dimension,
     centered around the non overlapped patches of dimensions 
     (patch_size x patch_size) that would fit in the original image.
+
+    Parameters:
+    imgs: 4 dimensional np array. Each element contains an RGB image
+    img_size: height and width of the each image
+    patch_size: size of the patches that will define the centers of the returned
+        patches
+    input_size: defines the dimension of the elements of the returned array, 
+        that will be of (input_size x input_size x nb_channels)
     '''
     inputs = []
     # For each padded image
@@ -240,14 +287,24 @@ def imgs_to_inputs(imgs, img_size, patch_size, input_size):
 
 def data_augmentation(X, rot_flag, flip_flag, bright_flag, 
                       bright_range = 0.3, contr_range = 0.25):
-    '''Data augmentation on X, element of size (input_size * input_size * 3).
+    '''Data augmentation on X, RGB image.
 
+    Performs arbitrary flipping, rotations and random changes to contrast and
+    brightness.
+    NOTE: default ranges of contrast and brightness are decided based on several
+          training results and on heuristic considerations. If the parameters 
+          are too high, the images becomes not recognizable.
+
+    Parameters:
+    X: RGB image (usually a single patch)
     rot_flag: randomly add 0, 1, 2 or 3 rotations of 90° to X
-    flip_flag: randomly decide to (or not to) flip X vertically or horizontally.
-    bright_flag: randomly change constrast and brightness of the input X. The
-        default ranges of contrast and brightness are decided based on several
-        training results and on heuristic considerations. If the parameters are 
-        too high, the images becomes not recognizable.
+    flip_flag: randomly decide to (or not to) flip X vertically or horizontally
+    bright_flag: randomly change constrast and brightness of the input X
+    bright_range: range of brightness modification
+    contr_range: range of contrast modification
+    
+    returns:
+    X: augmented version of the input
     '''
     #flip
     if flip_flag:
@@ -271,10 +328,20 @@ def data_augmentation(X, rot_flag, flip_flag, bright_flag,
     return X
 
 def crop_center(img, cropx, cropy):
-    ''' Crop a patch from img. Centered in the middle of the image and of 
-    dimensions (cropx x cropy). Works both for 1 and 3 channel images.
+    ''' Crop a patch from img. 
 
-    This function is used after a rotation of an arbitrary degree.
+    The crop will be centered in the middle of the image and will be of 
+    dimensions (cropx x cropy). Works both for 1 and 3 channel images.
+    This function is used after a rotation of an arbitrary degree, to retrieve
+    a square patch.
+
+    Parameters:
+    img: img to be rotated
+    cropx: width of the crop
+    cropy: height of the crop
+
+    Return:
+    cntr: central portion of the image of size (cropx x cropy)
     '''
     if len(img.shape) == 3:
         y,x, _ = img.shape
@@ -282,12 +349,23 @@ def crop_center(img, cropx, cropy):
         y,x = img.shape
     startx = x//2-(cropx//2)
     starty = y//2-(cropy//2)    
-    return img[starty:starty+cropy,startx:startx+cropx]    
+
+    cntr = img[starty:starty+cropy,startx:startx+cropx]
+    return cntr
 
 
 def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
     ''' Load images and pad them using mirror boundary conditions. If pad_size
     is zero, then the images are not padded.
+
+    Parameters: 
+    pad_size: padding size, boundary conditions
+    root_dir = folder containining the training images and the set images
+    verbose: verbosity level
+
+    return:
+    imgs: 4 dimensional np array containing RGB images
+    gt_imgs: 3 dimentsional np array containing groundtruth images
     '''
     # Load images
     image_dir = root_dir + "/training/images/"
@@ -300,7 +378,8 @@ def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
     if verbose : print("Loading " + str(n) + " groundtruth images")
     gt_imgs = [load_image(gt_dir + files[i]) for i in range(n)]
     # Padding
-    if verbose : print('Padding images using pad of: ', pad_size)
+    if verbose : 
+        if pad_size > 0:  print('Padding images using pad of: ', pad_size)        
     imgs = padding_imgs(np.array(imgs),pad_size)
     gt_imgs = padding_GT(np.array(gt_imgs),pad_size)
     # Print some infos
@@ -309,11 +388,19 @@ def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
 
     return imgs, gt_imgs
 
-def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, PLOT = True):
-    ''' Load the predicion of one model, saved in a (pickle) file called
-    PredictionName and return the IDXth predicted image.
+def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, 
+                                                                   PLOT = True):
+    ''' Load the predicion of one model and return one image.
+    
+    Parameters: 
+    PredictionName: name of the (pickle) file with the prediction
+    IDX: index of the image that will be returned
+    img_size: size of the image that will be returned
+    patch_size: size of the patches contained in the prediction
+    PLOT: if true a plot will be produced
 
-    If PLOT is true we generate also a plot of the prediction.
+    Returns:
+    im: the IDXth predicted image
     '''
     # Getting back the prediction:
     with open(PredictionName, 'rb') as f: 
@@ -332,15 +419,11 @@ def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, PLOT = T
 ################################################################################
 
 
-def street_surrounded(predicted_image, T, addstreet):
-    ''' is_foreground_sorrounded'''
-    '''If the boolean parameter 'addstreet' is set to true, it takes an image and convert 
-       foreground patches into street if they are surrounded by at least T street patches.
-       
-       If the boolean parameter 'addstreet' is set to false, it takes an image and convert 
-       street patches into foreground if they are surrounded by at least T foreground patches.
+def is_foregroungund_surrounded(predicted_image, T):
+    '''Take an image and convert foreground patches into street if they are 
+    surrounded by at least T street patches.
     
-       Image is a 2D array containing the patches.
+    Image is a 2D array containing the patches.
     '''
     nbr_patches = predicted_image.shape[0]
     for row in range(1,nbr_patches-1):
@@ -359,80 +442,9 @@ def street_surrounded(predicted_image, T, addstreet):
             neighbors = np.array([nghb_left,nghb_right,nghb_up,nghb_down,nghb_up_left,nghb_up_right,nghb_down_left,nghb_down_right])
 
             nbr_labels_street_nghb = np.sum(neighbors)
-            nbr_labels_foreground_nghb = 8 - nbr_labels_street_nghb
-            
-            if((nbr_labels_street_nghb >= T) and (addstreet)):
+
+            if(nbr_labels_street_nghb >= T):
                 predicted_image[col,row] = 1
-            if((nbr_labels_foreground_nghb >= T) and not(addstreet)):
-                predicted_image[col,row] = 0
-                
-    for col in range (1,nbr_patches-1):
-        #Upper border
-        nghb_left = predicted_image[col-1,0];
-        nghb_right = predicted_image[col+1,0];
-        nghb_down_left = predicted_image[col-1,1];
-        nghb_down = predicted_image[col,1];
-        nghb_down_right = predicted_image[col+1,1];
-        
-        neighbors = np.array([nghb_left,nghb_right,nghb_down,nghb_down_left,nghb_down_right])
-        nbr_labels_street_nghb = np.sum(neighbors)
-        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
-        
-        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
-                predicted_image[col,0] = 1
-        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
-                predicted_image[col,0] = 0
-                
-        #Lower border
-        nghb_left = predicted_image[col-1,37];
-        nghb_right = predicted_image[col+1,37];
-        nghb_up_left = predicted_image[col-1,36];
-        nghb_up = predicted_image[col,36];
-        nghb_up_right = predicted_image[col+1,36];
-        
-        neighbors = np.array([nghb_left,nghb_right,nghb_up,nghb_up_left,nghb_up_right])
-        nbr_labels_street_nghb = np.sum(neighbors)
-        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
-        
-        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
-                predicted_image[col,37] = 1
-        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
-                predicted_image[col,37] = 0
-                
-                
-    for row in range (1,nbr_patches-1):
-        #Left border
-        nghb_right = predicted_image[1,row];
-        nghb_up = predicted_image[0,row-1];
-        nghb_up_right = predicted_image[1,row-1];
-        nghb_down_right = predicted_image[1,row+1];
-        nghb_down = predicted_image[0,row+1];
-        
-        neighbors = np.array([nghb_right,nghb_up,nghb_down,nghb_up_right,nghb_down_right])
-        nbr_labels_street_nghb = np.sum(neighbors)
-        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
-        
-        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
-                predicted_image[0,row] = 1
-        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
-                predicted_image[0,row] = 0
-                
-        #Right border
-        nghb_up = predicted_image[37,row-1];
-        nghb_left = predicted_image[36,row];
-        nghb_up_left = predicted_image[36,row-1];
-        nghb_down_left = predicted_image[36,row+1];
-        nghb_down = predicted_image[37,row+1];
-        
-        neighbors = np.array([nghb_left,nghb_up,nghb_down,nghb_up_left,nghb_down_left])
-        nbr_labels_street_nghb = np.sum(neighbors)
-        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
-        
-        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
-                predicted_image[37,row] = 1
-        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
-                predicted_image[37,row] = 0
-                
     return predicted_image
 
 
@@ -447,18 +459,18 @@ def is_street(predicted_image, L, T):
     # Horizontal streets
     for row in range(L,nbr_patches-L):
         for col in range (nbr_patches): 
-            nghb_up = predicted_image[col,row-L-1:row-1]
-            nghb_down = predicted_image[col,row+1:row+L+1]
-            is_vertical_street = (nghb_up.sum() + nghb_down.sum() ) >= T
-            if(is_vertical_street):
+            nghb_left = predicted_image[col,row-L-1:row-1]
+            nghb_right = predicted_image[col,row+1:row+L+1]
+            is_horizontal_street = (nghb_left.sum() + nghb_right.sum() ) >= T
+            if(is_horizontal_street):
                 predicted_image[col,row] = 1
     
     # Vertical streets
     for row in range(nbr_patches):
         for col in range (L,nbr_patches-L):   
-            nghb_left = predicted_image[col-L-1:col-1,row]
-            nghb_right= predicted_image[col+1:col+L+1,row]
-            is_horizontal_street = (nghb_left.sum() + nghb_right.sum() ) >= T  
+            nghb_up = predicted_image[col-L-1:col-1,row]
+            nghb_down = predicted_image[col+1:col+L+1,row]
+            is_vertical_street = (nghb_down.sum() + nghb_up.sum() ) >= T  
             if( is_vertical_street):
                 predicted_image[col,row] = 1
                 
@@ -468,15 +480,11 @@ def is_street(predicted_image, L, T):
 def post_process_single(predicted_image):
     ''' Post processing routine for a single image
     '''
-    # Delete false positive (if a foreground patch is predicted as a street
-    # and is sorrounded by 7 foreground patches. 
-    predicted_image = street_surrounded(predicted_image, 8, False)
-    
-    # If the patch is predicted as foreground while it actually should be a street 
-    # --> It becomes a street. 
-    predicted_image = is_street(predicted_image, 6, 10)
-    predicted_image = street_surrounded(predicted_image, 8, True)
-               
+    nbr_patches = predicted_image.shape[0]
+    #predicted_image = is_street(predicted_image, 4, 6)
+    #predicted_image = is_foregroungund_surrounded(predicted_image, 7)
+    predicted_image = is_street(predicted_image, 5, 7)
+    predicted_image = is_foregroungund_surrounded(predicted_image, 7)
     return predicted_image
 
 def post_process_and_submit(PredictionName, SubmissionName, verbose = 1):
