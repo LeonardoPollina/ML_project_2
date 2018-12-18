@@ -518,7 +518,17 @@ def street_surrounded(predicted_image, T, addstreet):
                 predicted_image[37,row] = 1
         if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
                 predicted_image[37,row] = 0
-                
+    
+    for row in range (nbr_patches):
+        total_label_street = predicted_image[:,row].sum()
+        if (total_label_street/nbr_patches >= 0.85):
+            predicted_image[:,row] = 1
+    
+    for col in range (nbr_patches):
+        total_label_street = predicted_image[col,:].sum()
+        if (total_label_street/nbr_patches >= 0.85):
+            predicted_image[col,:] = 1
+            
     return predicted_image
 
 
@@ -560,7 +570,7 @@ def post_process_single(predicted_image):
     
     # If the patch is predicted as foreground while it actually should be a street 
     # --> It becomes a street. 
-    predicted_image = is_street(predicted_image, 6, 10)
+    predicted_image = is_street(predicted_image, 3, 5)
     predicted_image = street_surrounded(predicted_image, 8, True)
     return predicted_image
 
