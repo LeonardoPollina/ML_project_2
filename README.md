@@ -7,16 +7,24 @@ The project has been done using `Python 3.6.5`. Moreover, we rely on various lib
 
 | Library       | Version       |
 | ------------- |---------------|
-| `NumPy`       | 1.14.3        |
-| `Scipy `      | 1.1.0         |
-| `Scikit-learn`| 0.19.1        |
-| `Keras`       | 2.2.4         |
-| `Tensorflow`  | 1.12.0        |
+| NumPy       | 1.14.3        |
+| Scipy       | 1.1.0         |
+| Scikit-learn| 0.19.1        |
+| Keras       | 2.2.4         |
+| Tensorflow  | 1.12.0        |
 
-Note: `Keras` could be used also with `Theano` as a backend, however, our code is based on `Tensorflow`.
+Note: `Keras` could be used also with `Theano` as a backend; however, our code is based on `Tensorflow`.
 
+# Generate the prediction
+1. Check the version of your libraries and install the missing ones.
+2. Open the `config.py` file and select the following parameters: `ROOT_DIR` (directory containing the set images) and SubmissionName (name of the file where the submission will be saved).
+3. Execute the script `run.py`. 
 
-# Folder structure
+# Content description
+We are going to illustrate the structure of the folder and then to describe the sub-folders and the main files contained in it.
+
+## Folder structure
+
     .
     ├── run.py                          # Predict and generate a submission file
     ├── Notebooks                       
@@ -32,12 +40,6 @@ Note: `Keras` could be used also with `Theano` as a backend, however, our code i
     |  └── training_and_prediction.py
     └── ReadME.md
 
-# Generate the prediction
-1. Check the version of your libraries and install the missing ones.
-2. Open the `config.py` file and select the following parameters: `ROOT_DIR` (directory containing the set images) and SubmissionName (name of the file where the submission will be saved).
-3. Execute the script `run.py`. 
-
-# Content description
 ## `Notebooks` folder
 ## `utilities.py`
 ## `models` folder
