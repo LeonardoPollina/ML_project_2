@@ -11,9 +11,15 @@ class MODEL_CLASS:
         self.patch_size = 16
         self.input_size = 64
         self.pad_size = int(self.input_size/2 - self.patch_size/2)
-        self.pad_rotate_size = int( self.input_size / np.sqrt(2) ) + 2
         self.final_layer_units = 2
 
+        # If there will be arbitrary rotations, compute the pad_rotate_size
+        # accordingly.  
+        self.ARB_ROT_FLAG = True
+        if self.ARB_ROT_FLAG:
+            self.pad_rotate_size = int( self.input_size / np.sqrt(2) ) + 2
+        else:
+            self.pad_rotate_size = self.pad_size
 
         # Training parameters
         self.reg = 1e-5  
@@ -26,7 +32,7 @@ class MODEL_CLASS:
         # Data augmentation parameters
         self.FLIP_FLAG = True # add random flips to the patches
         self.BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
-
+        
 
         #Other stuff
         self.NameWeights = 'model_1512_Weights'
@@ -141,10 +147,10 @@ class MODEL_CLASS:
     ###########            PRINT INFORMATIONS            #######################
     ############################################################################
     def summary(self):
-        print('Model attributes:')
+        print('Main model attributes:')
         print('\tpatch_size = ', self.patch_size)
         print('\tinput_size = ', self.input_size)
-        print('\tpad_size = ', int(self.input_size/2 - self.patch_size/2))
+        print('\tpad_size = ', self.pad_size)
         print('\tpad_rotate_size = ', self.pad_rotate_size)
         print('\tfinal_layer_units = ', self.final_layer_units)
         print('\tpool_size = ', self.pool_size)
@@ -158,7 +164,7 @@ class MODEL_CLASS:
         print('\tsteps_per_epoch = ', self.steps_per_epoch)
 
         #Other stuff
-        print('\nOher attributes:')
+        print('\nOther attributes:')
         print('\tNameWeights = ', self.NameWeights)
         print('\tSubmissionName = ', self.SubmissionName)
         print('\tPredictionName = ', self.PredictionName)

@@ -11,14 +11,20 @@ class MODEL_CLASS:
         self.patch_size = 16
         self.input_size = 64
         self.pad_size = int(self.input_size/2 - self.patch_size/2)
-        self.pad_rotate_size = self.pad_size
         self.final_layer_units = 1
 
+        # If there will be arbitrary rotations, compute the pad_rotate_size
+        # accordingly.  
+        self.ARB_ROT_FLAG = True
+        if self.ARB_ROT_FLAG:
+            self.pad_rotate_size = int( self.input_size / np.sqrt(2) ) + 2
+        else:
+            self.pad_rotate_size = self.pad_size
 
         # Training parameters 
         self.learning_rate = 0.001
         self.epochs = 40
-        self.batch_size = 128
+        self.batch_size = 125
         self.steps_per_epoch = 250
 
 
@@ -53,8 +59,8 @@ class MODEL_CLASS:
             # We want to select randomly the patches inside the images. So we will
             # select a random pixel in the image and crop around it a square of the
             # correct size. To be able to crop we select pixels in between low and high
-            low=input_size//2
-            high = (train_shape + 2*pad_size - input_size//2)
+            low = self.input_size//2
+            high = (self.train_shape + 2*self.pad_size - self.input_size//2)
 
             for i in range(self.batch_size):
                 # Select a random image
@@ -135,11 +141,11 @@ class MODEL_CLASS:
     ###########            PRINT INFORMATIONS            #######################
     ############################################################################
     def summary(self):
-        print('Model attributes:')
+        print('Main model attributes:')
         print('\tpatch_size = ', self.patch_size)
         print('\tinput_size = ', self.input_size)
-        print('\tpad_size = ', int(self.input_size/2 - self.patch_size/2))
-        print('\tpad_rotate_size = ', self.pad_size)
+        print('\tpad_size = ', self.pad_size)
+        print('\tpad_rotate_size = ', self.pad_rotate_size)
         print('\tfinal_layer_units = ', self.final_layer_units)
         print('\tpool_size = ', self.pool_size)
 

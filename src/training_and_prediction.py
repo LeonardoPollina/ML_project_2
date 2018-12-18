@@ -1,21 +1,35 @@
+# Functions that rely on the MODEL_CLASS. Used to train the models and to 
+# handle the results.
+
 from utilities import *
 
 ################################################################################
 ##################### TRAINING #################################################
 ################################################################################
 def train(X, Y, MODEL, validation_ratio = -1):    
-    '''
-    Generate an instance of the model according to which one is defined in the 
-    class MODEL an train the model on X, Y.
-    If validation_ratio is a number between 0 and 1, X and Y are divided in train
-    and validation sets.
-
-    The function return an instance of the Keras model. 
-
+    '''Generate and train an instance of the model.
+    
+    X and Y are preprocessed (pad) according to the parameters of the model.
+    An instance of the model is created and the model is trained on X, Y.
     The training can be interrupted and in any and case the weights will be 
-    saved in a file according to the parameter in the MODEL class.
+    saved in a file called MODEL.NameWeights.
+
+    Parameters:
+    X: np array containing RGB images
+    Y: np array containing groundtruth images
+    MODEL: class of type MODEL_CLASS
+    validatio_ratio: ratio to split data in train/validation. If it is a 
+        number between 0 and 1, X and Y are divided in train and validation.
+    
+    Returns:
+    model: an instance of the Keras model. 
     '''
-    # Create the model tha will be trained
+    # Pad the images according to the model
+    print('Padding images using pad of: ', MODEL.pad_rotate_size)
+    X = padding_imgs(np.array(X), MODEL.pad_rotate_size)
+    Y = padding_GT(np.array(Y), MODEL.pad_rotate_size)
+
+    # Create the model
     model, stop_callback, lr_callback = MODEL.CreateModel()
     
     # Reproducibility + remember the deadline is the 20.12.2018
@@ -54,7 +68,8 @@ def train(X, Y, MODEL, validation_ratio = -1):
                                 epochs=MODEL.epochs,
                                 verbose=1,
                                 callbacks=[lr_callback, stop_callback],
-                                validation_data = MODEL.MinibatchGenerator(X_val,Y_val),
+                                validation_data = 
+                                          MODEL.MinibatchGenerator(X_val,Y_val),
                                 validation_steps = 5,)
         except KeyboardInterrupt:
             print('\n\nKeyboard interruption!\n\n')
@@ -69,16 +84,36 @@ def train(X, Y, MODEL, validation_ratio = -1):
 
 
 
-def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont, validation_ratio = -1, seed = 111):
+def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont, 
+                                             validation_ratio = -1, seed = 111):
     ''' This function allows to go on with the training of a model.
-        
-    The weights of the old model must be loaded and are saved in a file called
-    NameOld.
-    The new weights will be saved in a file called NameNew.
 
-    The train will continue up to keyboard interruption or for epochs_cont epochs.
+    X and Y are preprocessed (pad) according to the parameters of the model.
+    An instance of the model is created and the weights are loaded. Then the 
+    model is trained on X, Y for epochs_cont epochs.
+    The training can be interrupted and in any and case the weights will be 
+    saved in a file called NameNew.
+
+    Parameters:
+    X: np array containing RGB images
+    Y: np array containing groundtruth images
+    MODEL: class of type MODEL_CLASS
+    NameOld: file from where the weights will be loaded     
+    NameNew: new weights will be saved in a file called NameNew
+    epochs_cont: number of epochs to train the model
+    validatio_ratio: ratio to split data in train/validation. If it is a 
+        number between 0 and 1, X and Y are divided in train and validation.
+    seed: fix a new seed before re-starting the train
+
+    Returns:
+    model: an instance of the Keras model.         
     '''
-    # Create the model that will be trained
+    # Padding the images
+    print('Padding images using pad of: ', MODEL.pad_rotate_size)
+    X = padding_imgs(np.array(X), MODEL.pad_rotate_size)
+    Y = padding_GT(np.array(Y), MODEL.pad_rotate_size)
+
+    # Create the model
     model, stop_callback, lr_callback = MODEL.CreateModel()
     
     # Load the old weights
@@ -121,7 +156,8 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont, validation_ratio =
                                 epochs=epochs_cont,
                                 verbose=1,
                                 callbacks=[lr_callback, stop_callback],
-                                validation_data = MODEL.MinibatchGenerator(X_val,Y_val),
+                                validation_data = 
+                                          MODEL.MinibatchGenerator(X_val,Y_val),
                                 validation_steps = 5,)
         except KeyboardInterrupt:
             print('\n\nKeyboard interruption!\n\n')
@@ -140,23 +176,37 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont, validation_ratio =
 
 
 def ComputeLocalF1Score(X, Y, MODEL, NameWeights):
-    '''This function takes as input X and Y, arrays containing the images and 
-    the gt_images NOT padded, and computes the F1 score of the prediction using
+    '''F1 score on X,Y  using MODEL.
+
+    This function takes as input X and Y, arrays containing the images and 
+    the gt_images, and computes the F1 score of the prediction using
     the model contained in the MODEL class. The name of the file containing the
-    weights to be used must be passed as an argument
+    weights to be loaded must be passed as an argument
     
-    NOTE: this function is used especially when we use a model with 2 final units,
-    where we weren't able to monitor the f1 score during the training. Hence we split 
-    at the very beginning our data in train/validation and we use this function
-    for the validation set, instead of relying on the function "train", with a
-    validation_ratio. 
+    NOTE: this function is used especially when we use a model with 2 final 
+    units, where we weren't able to monitor the F1 score during the training. 
+    Hence we split at the very beginning our data in train/validation and we use
+    this function for the validation set, instead of relying on the function 
+    "train", with a validation_ratio. 
+
+    Parameters:
+    X: np array containing RGB images
+    Y: np array containing groundtruth images
+    MODEL: class of type MODEL_CLASS
+    NameWeights: file from where the weights will be loaded   
+
+    Returns: void  
     '''
-    model, _, _ = MODEL.CreateModel()
-    model.load_weights(NameWeights)
+    # Padding
+    print('Padding images using pad of: ', MODEL.pad_size)
     X = padding_imgs(np.array(X),MODEL.pad_size)
     Y = np.asarray(Y) # To be sure we convert again
     N_valid = Y.shape[0]
     print('Number of validation images: ', N_valid)
+
+    # Model
+    model, _, _ = MODEL.CreateModel()
+    model.load_weights(NameWeights)
 
     #Create suitable input/labels for the model
     val_inputs = imgs_to_inputs(X, MODEL.train_shape, MODEL.patch_size, 
@@ -189,8 +239,15 @@ def ComputeLocalF1Score(X, Y, MODEL, NameWeights):
 def PredictAndSubmit(MODEL, NameWeights, SubmissionName, PredictionName,
                      root_dir = '../Data'):
     '''This function loads the test images and performs the prediction.
-       After the prediction, a submission file is generated and the prediction 
-       is saved using pickle.
+
+    Parameters: 
+    MODEL: class of type MODEL_CLASS
+    NameWeights: file from where the weights will be loaded 
+    SubmissionName: name of the submission file that will be generated
+    PredictionName: name of the prediction file (pickle)  
+    root_dir: folder containining the training images and the set images
+
+    Returns: void
     '''
     print('Loading test images')
     test_images = np.asarray(pick_test_images(root_dir))
@@ -227,8 +284,16 @@ def PredictAndSubmit(MODEL, NameWeights, SubmissionName, PredictionName,
 
 
 def PredictAndPlot(img, MODEL, NameWeights, PLOT = True):
-    ''' Use the model to predict on the img. Return the predicted image. 
-    If PLOT is True also a plot is produced.
+    ''' Use the model to predict on the img. 
+    
+    Parameters:
+    img: RGB image
+    MODEL: class of type MODEL_CLASS
+    NameWeights: file from where the weights will be loaded 
+    PLOT: boolean, if True a plot is produced
+
+    Returns:
+    im: the predicted image
     '''
     model, _, _ = MODEL.CreateModel()
     model.load_weights(NameWeights)
@@ -246,7 +311,8 @@ def PredictAndPlot(img, MODEL, NameWeights, PLOT = True):
                                 * 1 ).flatten()
     
     # Plot
-    im = label_to_img(dim, dim, MODEL.patch_size, MODEL.patch_size, predicted_labels)
+    im = label_to_img(dim, dim, MODEL.patch_size, 
+                      MODEL.patch_size, predicted_labels)
     if PLOT:
         plt.imshow( concatenate_images(img,im) )
 
