@@ -3,7 +3,7 @@
 In this folder, there are all the functions needed to develop our project on road segmentation of satellite aerial images. The aim of the project is to segment an RGB image into small patches, and to assign to each one of them a binary label. Value 1 means that there is a street, while 0 represents everything else (trees, houses, parking lots, ecc...)
 
 ### Required setup/libraries
-The project has been done using `Python 3.6.5`. Moreover, we rely on various libraries. In the table we list the ones that we used.
+The project has been done using `Python 3.6.5`. Moreover, we rely on various libraries; in the table we list the ones that we used.
 
 | Library       | Version       |
 | ------------- |---------------|
@@ -40,12 +40,33 @@ We are going to illustrate the structure of the folder and then to describe the 
     |    └── training_and_prediction.py
     └── ReadME.md
 
-## `Notebooks` folder
-    .                        
-    ├── Notebooks                       
-    │   └── ...                  
-    .
- 
-    
-## `utilities.py`
-## `models` folder
+## Notebooks folder
+In this folder, there are notebooks that show our main training procedures. They could be runned, provided the steps 1 and 2 on the configuration instructions, but this is not suggested because of the long computational time that may be required.
+
+<ul>
+<li><b>Logistic_regression.ipynb</b></li>
+
+Here it is shown the training procedure in order to find the best hyperparameters (degree of polynomial expansion and regularization parameter) of the regularized logistic regression.
+
+<li><b>nome(final model)</b></li>
+
+Final model
+
+<li><b>nome(example of CNN with x final_layer_units)</b></li>
+
+bla bla bla
+
+</ul>
+
+## src folder
+<ul>
+<li><b>utilities.py</b></li>
+
+
+<li><b>logistic_utilities.py</b></li>
+
+
+<li><b>training_and_prediction.py</b></li>
+</ul>
+
+## models folder
