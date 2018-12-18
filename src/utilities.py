@@ -419,11 +419,14 @@ def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16,
 ################################################################################
 
 
-def is_foregroungund_surrounded(predicted_image, T):
-    '''Take an image and convert foreground patches into street if they are 
-    surrounded by at least T street patches.
-    
-    Image is a 2D array containing the patches.
+def street_surrounded(predicted_image, T, addstreet):
+    ''' is_foreground_sorrounded'''
+    '''If the boolean parameter 'addstreet' is set to true, it takes an image and convert 
+       foreground patches into street if they are surrounded by at least T street patches.
+       
+       If the boolean parameter 'addstreet' is set to false, it takes an image and convert 
+       stre
+        Image is a 2D array containing the patches.
     '''
     nbr_patches = predicted_image.shape[0]
     for row in range(1,nbr_patches-1):
@@ -443,8 +446,80 @@ def is_foregroungund_surrounded(predicted_image, T):
 
             nbr_labels_street_nghb = np.sum(neighbors)
 
-            if(nbr_labels_street_nghb >= T):
+            nbr_labels_foreground_nghb = 8 - nbr_labels_street_nghb
+            
+            if((nbr_labels_street_nghb >= T) and (addstreet)):
                 predicted_image[col,row] = 1
+-            if((nbr_labels_foreground_nghb >= T) and not(addstreet)):
+                predicted_image[col,row] = 0
+                
+    for col in range (1,nbr_patches-1):
+        #Upper border
+        nghb_left = predicted_image[col-1,0];
+        nghb_right = predicted_image[col+1,0];
+        nghb_down_left = predicted_image[col-1,1];
+        nghb_down = predicted_image[col,1];
+        nghb_down_right = predicted_image[col+1,1];
+        
+        neighbors = np.array([nghb_left,nghb_right,nghb_down,nghb_down_left,nghb_down_right])
+        nbr_labels_street_nghb = np.sum(neighbors)
+        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
+        
+        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
+                predicted_image[col,0] = 1
+        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
+                predicted_image[col,0] = 0
+                
+        #Lower border
+        nghb_left = predicted_image[col-1,37];
+        nghb_right = predicted_image[col+1,37];
+        nghb_up_left = predicted_image[col-1,36];
+        nghb_up = predicted_image[col,36];
+        nghb_up_right = predicted_image[col+1,36];
+        
+        neighbors = np.array([nghb_left,nghb_right,nghb_up,nghb_up_left,nghb_up_right])
+        nbr_labels_street_nghb = np.sum(neighbors)
+        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
+        
+        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
+                predicted_image[col,37] = 1
+        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
+                predicted_image[col,37] = 0
+                
+                
+    for row in range (1,nbr_patches-1):
+        #Left border
+        nghb_right = predicted_image[1,row];
+        nghb_up = predicted_image[0,row-1];
+        nghb_up_right = predicted_image[1,row-1];
+        nghb_down_right = predicted_image[1,row+1];
+        nghb_down = predicted_image[0,row+1];
+        
+        neighbors = np.array([nghb_right,nghb_up,nghb_down,nghb_up_right,nghb_down_right])
+        nbr_labels_street_nghb = np.sum(neighbors)
+        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
+        
+        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
+                predicted_image[0,row] = 1
+        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
+                predicted_image[0,row] = 0
+                
+        #Right border
+        nghb_up = predicted_image[37,row-1];
+        nghb_left = predicted_image[36,row];
+        nghb_up_left = predicted_image[36,row-1];
+        nghb_down_left = predicted_image[36,row+1];
+        nghb_down = predicted_image[37,row+1];
+        
+        neighbors = np.array([nghb_left,nghb_up,nghb_down,nghb_up_left,nghb_down_left])
+        nbr_labels_street_nghb = np.sum(neighbors)
+        nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
+        
+        if((nbr_labels_street_nghb >= T-3) and (addstreet)):
+                predicted_image[37,row] = 1
+        if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
+                predicted_image[37,row] = 0
+                
     return predicted_image
 
 
@@ -459,18 +534,18 @@ def is_street(predicted_image, L, T):
     # Horizontal streets
     for row in range(L,nbr_patches-L):
         for col in range (nbr_patches): 
-            nghb_left = predicted_image[col,row-L-1:row-1]
-            nghb_right = predicted_image[col,row+1:row+L+1]
-            is_horizontal_street = (nghb_left.sum() + nghb_right.sum() ) >= T
-            if(is_horizontal_street):
+            nghb_up = predicted_image[col,row-L-1:row-1]
+            nghb_down = predicted_image[col,row+1:row+L+1]
+            is_vertical_street = (nghb_up.sum() + nghb_down.sum() ) >= T
+            if(is_vertical_street):
                 predicted_image[col,row] = 1
     
     # Vertical streets
     for row in range(nbr_patches):
         for col in range (L,nbr_patches-L):   
-            nghb_up = predicted_image[col-L-1:col-1,row]
-            nghb_down = predicted_image[col+1:col+L+1,row]
-            is_vertical_street = (nghb_down.sum() + nghb_up.sum() ) >= T  
+            nghb_left = predicted_image[col-L-1:col-1,row]
+            nghb_right= predicted_image[col+1:col+L+1,row]
+            is_horizontal_street = (nghb_left.sum() + nghb_right.sum() ) >= T   
             if( is_vertical_street):
                 predicted_image[col,row] = 1
                 
@@ -480,11 +555,14 @@ def is_street(predicted_image, L, T):
 def post_process_single(predicted_image):
     ''' Post processing routine for a single image
     '''
-    nbr_patches = predicted_image.shape[0]
-    #predicted_image = is_street(predicted_image, 4, 6)
-    #predicted_image = is_foregroungund_surrounded(predicted_image, 7)
-    predicted_image = is_street(predicted_image, 5, 7)
-    predicted_image = is_foregroungund_surrounded(predicted_image, 7)
+    # Delete false positive (if a foreground patch is predicted as a street
+    # and is sorrounded by 7 foreground patches. 
+    predicted_image = street_surrounded(predicted_image, 8, False)
+    
+    # If the patch is predicted as foreground while it actually should be a street 
+    # --> It becomes a street. 
+    predicted_image = is_street(predicted_image, 6, 10)
+    predicted_image = street_surrounded(predicted_image, 8, True)
     return predicted_image
 
 def post_process_and_submit(PredictionName, SubmissionName, verbose = 1):
