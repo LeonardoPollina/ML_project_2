@@ -531,10 +531,8 @@ def is_street(predicted_image, L, T):
     '''
     nbr_patches = predicted_image.shape[0]    
     # Horizontal streets
-    #for row in range(L,nbr_patches-L):
-    #    for col in range (1, nbr_patches-1): 
-    for row in range(nbr_patches):
-        for col in range (L,nbr_patches-L): 
+    for row in range(L,nbr_patches-L):
+        for col in range (nbr_patches): 
             nghb_up = predicted_image[col,row-L-1:row-1]
             nghb_down = predicted_image[col,row+1:row+L+1]
             is_vertical_street = (nghb_up.sum() + nghb_down.sum() ) >= T
@@ -542,10 +540,8 @@ def is_street(predicted_image, L, T):
                 predicted_image[col,row] = 1
     
     # Vertical streets
-    #for row in range(1,nbr_patches-1):
-     #   for col in range (L,nbr_patches-L):
-    for row in range(L,nbr_patches-L):
-        for col in range (nbr_patches):
+    for row in range(nbr_patches):
+        for col in range (L,nbr_patches-L):   
             nghb_left = predicted_image[col-L-1:col-1,row]
             nghb_right= predicted_image[col+1:col+L+1,row]
             is_horizontal_street = (nghb_left.sum() + nghb_right.sum() ) >= T   
