@@ -201,8 +201,7 @@ def pick_test_images(root_dir = '../Data'):
     '''
     test_imgs = []
     for i in range(1, 51):
-        name = root_dir + '/test_set_images/test_' + str(i) + '/test_' + 
-                str(i) + '.png'
+        name = root_dir + '/test_set_images/test_' + str(i) + '/test_' + str(i) + '.png'
         test_imgs.append(load_image(name))
     return np.asarray(test_imgs)
     
@@ -450,7 +449,7 @@ def street_surrounded(predicted_image, T, addstreet):
             
             if((nbr_labels_street_nghb >= T) and (addstreet)):
                 predicted_image[col,row] = 1
--            if((nbr_labels_foreground_nghb >= T) and not(addstreet)):
+            if((nbr_labels_foreground_nghb >= T) and not(addstreet)):
                 predicted_image[col,row] = 0
                 
     for col in range (1,nbr_patches-1):
