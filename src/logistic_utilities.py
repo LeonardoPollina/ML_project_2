@@ -68,7 +68,8 @@ def grid_search_hyperparam(y, tx, lambdas, degrees, verbose = 2):
     f1 = np.zeros((len(lambdas), len(degrees)))
     #We iterate on the hyperparameters to find the best combination
     for idx_lambda, lambda_ in enumerate(lambdas):
-        if verbose >= 1 : print(f'Grid search ====> {idx_lambda + 1}/{len(lambdas)} lambda starts...')
+        if verbose >= 1 : print(f'Grid search ====> '
+                            f'{idx_lambda + 1}/{len(lambdas)} lambda starts...')
         for idx_degree, degree in enumerate(degrees):
             #Degree augmentation
             poly = PolynomialFeatures(degree)
@@ -78,7 +79,8 @@ def grid_search_hyperparam(y, tx, lambdas, degrees, verbose = 2):
             f1_temp = cross_validation(y, x_augmented, k_indices, lambda_)
             #Corresponding accuracy saved
             f1[idx_lambda, idx_degree] = f1_temp
-            if verbose == 2: print('Grid search ====> Lambda = %.2e, degree = %d, F1-score = %.3f' % (1/lambda_, degree, f1_temp))
+            if verbose == 2: print('Grid search ====> Lambda = %.2e, '
+                'degree = %d, F1-score = %.3f' % (1/lambda_, degree, f1_temp))
     #Determine the best combination of hyperparameters
     max_f1 = np.max(f1)
     best_lambda = lambdas[ np.where( f1 == max_f1 )[0] ][0]
