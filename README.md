@@ -60,13 +60,14 @@ bla bla bla
 
 ## src folder
 <ul>
-<li><b>utilities.py</b></li>
-
-
-<li><b>logistic_utilities.py</b></li>
-
-
+<li><b>utilities.py</b>
+    <ul>
+        <li><b> given </b></li>
+        <li><b> nfdfdono </b></li>
+    </ul>
+    </li>
 <li><b>training_and_prediction.py</b></li>
+<li><b>logistic_utilities.py</b></li>
 </ul>
 
 ## models folder
