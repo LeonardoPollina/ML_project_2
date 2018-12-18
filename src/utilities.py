@@ -147,7 +147,6 @@ def get_idx_split_data(N, ratio, seed=1):
     N: the number of data that we need to split
     ratio: ratio of the splitting
     seed: numpy random seed selection
-
     Returns:
     idx_tr, idx_val: random indices to select the train/validation set.
     '''
@@ -192,27 +191,24 @@ def MY_mask_to_submission_strings(mask1D, img_number):
             
 def pick_test_images(root_dir = '../Data'):
     ''' Pick the images, located in the root directory. 
-
     Parameters:
     root_dir: folder containining the training images and the set images
-
     Returns:
     test_imgs: np array containing the test images
     '''
     test_imgs = []
     for i in range(1, 51):
-        name = root_dir + '/test_set_images/test_' + str(i) + '/test_' + str(i) + '.png'
+        name = root_dir + '/test_set_images/test_' + str(i) + '/test_' + \
+                str(i) + '.png'
         test_imgs.append(load_image(name))
     return np.asarray(test_imgs)
     
     
 def padding_imgs(imgs,pad_size):
     ''' Pad an array of RGB images using NumPy. Mirror boundary conditions.
-
     Parameters:
     imgs: 4 dimensional np array. Each element contains an RGB image
     pad_size: padding size
-
     Returns:
     X: 4 dimensional np array. Each element contains the padded RGB image
     '''
@@ -231,11 +227,9 @@ def padding_imgs(imgs,pad_size):
 
 def padding_GT(imgs,pad_size):
     ''' Pad an array of 1 channel images using NumPy.
-
     Parameters:
     imgs: 3 dimensional np array. Each element contains a 1 channel image
     pad_size: padding size
-
     Returns:
     X: 3 dimensional np array. Each element contains the padded image
     '''
@@ -259,7 +253,6 @@ def imgs_to_inputs(imgs, img_size, patch_size, input_size):
     them, this function allows to extract patches of the desired dimension,
     centered around the non overlapped patches of dimensions 
     (patch_size x patch_size) that would fit in the original image.
-
     Parameters:
     imgs: 4 dimensional np array. Each element contains an RGB image
     img_size: height and width of the each image
@@ -287,13 +280,11 @@ def imgs_to_inputs(imgs, img_size, patch_size, input_size):
 def data_augmentation(X, rot_flag, flip_flag, bright_flag, 
                       bright_range = 0.3, contr_range = 0.25):
     '''Data augmentation on X, RGB image.
-
     Performs arbitrary flipping, rotations and random changes to contrast and
     brightness.
     NOTE: default ranges of contrast and brightness are decided based on several
           training results and on heuristic considerations. If the parameters 
           are too high, the images becomes not recognizable.
-
     Parameters:
     X: RGB image (usually a single patch)
     rot_flag: randomly add 0, 1, 2 or 3 rotations of 90° to X
@@ -328,17 +319,14 @@ def data_augmentation(X, rot_flag, flip_flag, bright_flag,
 
 def crop_center(img, cropx, cropy):
     ''' Crop a patch from img. 
-
     The crop will be centered in the middle of the image and will be of 
     dimensions (cropx x cropy). Works both for 1 and 3 channel images.
     This function is used after a rotation of an arbitrary degree, to retrieve
     a square patch.
-
     Parameters:
     img: img to be rotated
     cropx: width of the crop
     cropy: height of the crop
-
     Return:
     cntr: central portion of the image of size (cropx x cropy)
     '''
@@ -356,12 +344,10 @@ def crop_center(img, cropx, cropy):
 def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
     ''' Load images and pad them using mirror boundary conditions. If pad_size
     is zero, then the images are not padded.
-
     Parameters: 
     pad_size: padding size, boundary conditions
     root_dir = folder containining the training images and the set images
     verbose: verbosity level
-
     return:
     imgs: 4 dimensional np array containing RGB images
     gt_imgs: 3 dimentsional np array containing groundtruth images
@@ -397,7 +383,6 @@ def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16,
     img_size: size of the image that will be returned
     patch_size: size of the patches contained in the prediction
     PLOT: if true a plot will be produced
-
     Returns:
     im: the IDXth predicted image
     '''
