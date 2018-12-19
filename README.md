@@ -25,8 +25,6 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 # Content description
 We are going to illustrate the structure of the present folder, its sub-folders and the main files.
 
-## Folder structure (THIS TITLE IS MAYBE NOT NECESSARY AND THE SENTENCE COULD BE "Structure of the present folder, its sub-folders and the main files :" )
-
     .
     ├── run.py                                    # Predict and generate a submission file
     ├── config.py                                 # A couple of configuration parameters
@@ -69,7 +67,9 @@ This notebook shows the training procedure we applied (80/20 train/validation) t
     These functions are general utilities that do not rely on the class <code>MODEL_CLASS()</code>; the file is divided in the following sub-sections.
     <ul>
         <li><b>Given functions:</b></li> This section contains the functions given with the project or throughout the course laboratories.
-        <li><b>Add-section(s?):</b></li> bla bla bla bla.
+        <li><b>Loading data:</b></li> Functions to handle the loading of the images.
+        <li><b>Images manipulation:</b></li> Operations applied to the images like padding, data augmentations and the generation of suitable patches to feed the models.
+        <li><b>Submission:</b></li> Functions used to generate the submission file from a prediction.
         <li><b>Post-processing:</b></li> Functions used to improve the F1-score given by the prediction. Some intuitive "continuity" criteria regarding the streets were applied. 
     </ul>
     </li>
@@ -88,7 +88,7 @@ Here you can find some of the models we tried. These models are defined using a 
     <li><b>nome_modello_finale.py:</b></li> 
     This is our final model. DESCRIPTION?
     <li><b>One_unit_model.py:</b></li> 
-    This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary\ and the F1-score is computed among the <code>metrics</code>.
+    This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary and the F1-score is computed among the <code>metrics</code>.
     <li><b>Recurrent_model.py:</b></li> 
     This is an example of one of the models containing alternative paths inside the architecture (i.e. Recurrent Neural Network).
 </ul>
