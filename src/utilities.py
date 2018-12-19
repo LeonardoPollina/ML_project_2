@@ -129,9 +129,9 @@ def split_data(x, y, ratio, seed=1):
     #Used to compute how many samples correspond to the desired ratio.
     limit = int(y.shape[0]*ratio)
     x_tr = xrand[:limit]
-    x_te = xrand[(limit+1):]
+    x_te = xrand[(limit):]
     y_tr = yrand[:limit]
-    y_te = yrand[(limit+1):]
+    y_te = yrand[(limit):]
     return x_tr, x_te, y_tr, y_te
 
 
@@ -581,7 +581,7 @@ def get_idx_split_data(N, ratio, seed=1):
     #Used to compute how many samples correspond to the desired ratio.
     limit = int(N*ratio)
     idx_tr = idx_permuted[:limit]
-    idx_val = idx_permuted[(limit+1):]
+    idx_val = idx_permuted[limit:]
     return idx_tr, idx_val
 
 def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, 
