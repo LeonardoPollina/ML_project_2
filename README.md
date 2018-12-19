@@ -26,23 +26,23 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 We are going to illustrate the structure of the present folder, its sub-folders and the main files.
 
     .
-    ├── run.py                                 # Predict and generate a submission file
-    ├── config.py                              # A couple of configuration parameters
-    ├── WeigthsFinalModel                      # Weights of the final model
     ├── Notebooks                       
-    |   ├── FINAL_SUBMISSION_PROTOTYPE         # Training of the final model
-    │   ├── ONE_NEURON_PROTOTYPE               # Training with only one neuron at the end
-    │   └── Logistic_regression.ipynb          # Logistic regression
+    |   ├── Best_model_training.ipynb          # Training of our best model
+    │   ├── Logistic_regression.ipynb          # Logistic regression
+    │   └── Training_example_1_neuron.ipynb    # Training with only one neuron at the end
     └── src
     │   ├── models                       
-    │   |   ├── nome_modello_finale           # Final model
-    │   |   ├── model_vgg_1_neuron.py         # VGG-like model with one neuron at the end  
-    │   |   └── model_RNN.py                  # Model that implements a recurrent NN
-    |   ├── utilities.py                 
-    |   ├── training_and_prediction.py
-    |   ├── f1_score.py
-    |   └── logistic_utilities.py
-    └── ReadME.md
+    │   |   ├── best_model.py                  # Our best model
+    │   |   ├── model_RNN.py                   # Recurrent NN
+    │   |   └── model_vgg_1_neuron.py          # VGG-like network with one neuron at the end  
+    |   ├── f1_score.py                        # Implementation of F1-score
+    |   ├── logistic_utilities.py              # Utilities for the logistic regression
+    |   ├── training_and_prediction.py         # Functions to train and predict 
+    |   └── utilities.py                       # General utilities
+    ├── config.py                              # A couple of configuration parameters
+    ├── ReadME.md                              # ReadMe
+    ├── run.py                                 # Predict and generate a submission file
+    └── WeigthsFinalModel                      # Weights of the final model
 
 ## Notebooks folder
     .                        
@@ -52,17 +52,18 @@ We are going to illustrate the structure of the present folder, its sub-folders 
 In this folder, there are the notebooks showing our main training procedures. These notebooks have already been run to avoid a waste of time for the reader. 
 
 <ul>
+<li><b>Best_model_training.ipynb</b></li>
+
+This notebook shows the training procedure we applied (80/20 train/validation) to our best model. TO ADD WHICH MODEL THIS IS
+
+<li><b>Training_example_1_neuron.ipynb</b></li>
+
+This notebook shows the training procedure we applied (80/20 train/validation) to a model among those implemented with only one neuron in the output layer.
+
 <li><b>Logistic_regression.ipynb</b></li>
 
 This notebook shows the training procedure to find the best hyperparameters (degree of polynomial expansion and regularization parameter) of the regularized logistic regression. This classifier was used only at the beginning to have a starting F1-score to compare with the more advanced (and computational demanding) CNN models. 
 
-<li><b>FINAL_MODEL_PROTOTYPE </b></li>
-
-This notebook shows the training procedure we applied (80/20 train/validation) to our best model. TO ADD WHICH MODEL THIS IS
-
-<li><b>ONE_NEURON_PROTOTYPE </b></li>
-
-This notebook shows the training procedure we applied (80/20 train/validation) to a model among those implemented with only one neuron in the output layer.
 </ul>
 
 ## src folder
