@@ -19,7 +19,8 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 # Generate the prediction
 1. Check the version of your libraries and install the missing ones.
 2. Open the `config.py` file and select the following parameters: <code>ROOT_DIR</code> (directory containing the set images), <code>NameWeights</code> (name of the file were the weights are saved) and <code>SubmissionName</code> (name of the file where the submission will be saved).
-3. Execute the script `run.py`. 
+3. Note that the file containing the weights should be placed in the same folder of the script `run.py`.
+4. Execute the script `run.py`. 
 
 # Content description
 We are going to illustrate the structure of the folder and then to describe the sub-folders and the main files contained in it.
@@ -29,6 +30,7 @@ We are going to illustrate the structure of the folder and then to describe the 
     .
     ├── run.py                                    # Predict and generate a submission file
     ├── config.py                                 # A couple of configuration parameters
+    ├── WeigthsFinalModel                         # Weights of the final model
     ├── Notebooks                       
     │      ├── FINAL_SUBMISSION_PROTOTYPE         # Training of the final model
     │      ├── ONE_NEURON_PROTOTYPE               # Training with only one neuron at the end
