@@ -76,7 +76,7 @@ This notebook shows the training procedure we applied (80/20 train/validation) t
     <ul>
         <li><b>Given functions:</b></li> This section contains the functions given with the project or throughout the course laboratories.
         <li><b>Loading data:</b></li> Functions to handle the loading of the images.
-        <li><b>Images manipulation:</b></li> Operations applied to the images like padding, data augmentations and the generation of suitable patches to feed the models.
+        <li><b>Images manipulation:</b></li> Operations applied to the images (like padding or data augmentation).
         <li><b>Submission:</b></li> Functions used to generate the submission file from a prediction.
         <li><b>Post-processing:</b></li> Functions used to improve the F1-score given by the prediction. Some intuitive "continuity" criteria regarding the streets were applied. 
     </ul>
