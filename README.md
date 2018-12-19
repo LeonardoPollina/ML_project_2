@@ -18,7 +18,7 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 
 # Generate the prediction
 1. Check the version of your libraries and install the missing ones.
-2. Open the `config.py` file and select the following parameters: `ROOT_DIR` (directory containing the set images) and `SubmissionName` (name of the file where the submission will be saved).
+2. Open the `config.py` file and select the following parameters: <code>ROOT_DIR</code> (directory containing the set images) and <code>SubmissionName</code> (name of the file where the submission will be saved).
 3. Execute the script `run.py`. 
 
 # Content description
@@ -60,27 +60,31 @@ bla bla bla
 </ul>
 
 ## src folder
+
 <ul>
 <li><b>utilities.py</b>
-    These functions are general utilities that do not rely on the class `MODEL_CLASS()`; the file is divided in sub-sections.
+    These functions are general utilities that do not rely on the class <code>MODEL_CLASS()</code>; the file is divided in sub-sections.
     <ul>
         <li><b>Given functions:</b></li> This section contains the functions that we used but that have not been implemented by us. This functions have been given along with the project description, or throughout the course laboratories.
         <li><b>Post-processing:</b></li> Functions used to manipulate the prediction in order to improve the F1-score. We tried to apply some "continuity" criteria to improve our prediction.
     </ul>
     </li>
 <li><b>training_and_prediction.py</b></li>
-    These functions rely on the class `MODEL_CLASS()`. As the name of the file suggests, these methods are used to train a `Keras` model, generate a prediction and handle the prediction results.
+    These functions rely on the class <code>MODEL_CLASS()</code>. As the name of the file suggests, these methods are used to train a Keras model, generate a prediction and handle the prediction results.
 <li><b>f1_Score.py</b></li>
-    In `Keras 2.0`, F1-score has been removed from the available `metrics` of the sequential model's `compile` function. We implemented our customed F1-score metrics starting from the functions of the old version of `Keras`. This can be used in the case of a model with only one unit in the final layer.
+    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. We implemented our customed F1-score metrics starting from the functions of the old version of Keras. This can be used in the case of a model with only one unit in the final layer.
 <li><b>logistic_utilities.py</b></li>
     These are the functions used in order to train the logistic model.
 </ul>
 
 ## models folder
-Here you can find some of the models that we tried. The models are defined using a class called `MODEL_CLASS()`, and according to the attributes and the methods of this class different models can be defined.
+Here you can find some of the models that we tried. The models are defined using a class called <code>MODEL_CLASS()</code>, and according to the attributes and the methods of this class different models can be defined.
 <ul>
-    <li><b>nome_modello_finale.py:</b></li> This is our final model
-    <li><b>One_unit_model.py:</b></li> This is a model that has only one unit in the final layer. 
-    <li><b>Recurrent_model.py:</b></li> An example of one of the models that we tried involving a recurrent neural network.
+    <li><b>nome_modello_finale.py:</b></li> 
+    This is our final model
+    <li><b>One_unit_model.py:</b></li> 
+    This is a model that has only one unit in the final layer. 
+    <li><b>Recurrent_model.py:</b></li> 
+    An example of one of the models that we tried involving a recurrent neural network.
 </ul>
  
