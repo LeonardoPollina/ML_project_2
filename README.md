@@ -1,6 +1,6 @@
 # Machine learning project 2 (CS-433)
 ### Option 2: Road Segmentation
-In this folder, there are all the functions needed to develop our project on road segmentation of satellite aerial images. The aim of the project is to segment an RGB image into small patches, and to assign to each one of them a binary label. Value 1 means that there is a street, while 0 represents everything else (trees, houses, parking lots, etc...).
+In this folder, there are all the functions needed to develop our project on road segmentation of satellite aerial images. The aim of the project is to segment an RGB image into small patches, and to assign to each one of them a binary label: value 1 means that there is a street, while 0 represents everything else (grass, houses, parking lots, etc...).
 
 ### Required setup/libraries
 The project has been done using `Python 3.6.5`. Moreover, we rely on various libraries; in the table we list the ones that we used.
