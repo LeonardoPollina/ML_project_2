@@ -1,5 +1,5 @@
-# VGG-like model with only two neurons in the final layer.
-# With this model (without post-processing) we obtained a F1-score of: 0.853
+# Model to train a RNN. 
+# With this model (without post-processing) we obtained a F1-score of: 0.806
 
 from utilities import *
 from f1_score import *
@@ -9,17 +9,18 @@ class MODEL_CLASS:
     # INITIALIZATION: set some parameters of the model
     def __init__(self):
         # Short description
-        self.WhoAmI = 'VGG-like model with 2 neurons in the final layer.'
+        self.WhoAmI = 'VGG-like model with skip connections (RNN).'
 
         # Model parameters
         self.pool_size = (2, 2)
         self.train_shape = 400 
         self.patch_size = 16
-        self.input_size = 64
+        self.input_size = 72
         self.pad_size = int(self.input_size/2 - self.patch_size/2)
         self.final_layer_units = 2
 
         # Training parameters
+        self.reg = 1e-5
         self.learning_rate = 0.001
         self.epochs = 40
         self.batch_size = 128
@@ -28,8 +29,7 @@ class MODEL_CLASS:
 
         # Data augmentation parameters
         self.FLIP_FLAG = True # add random flips to the patches
-        self.BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and 
-                                         # the constrast
+        self.BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
         # If there will be arbitrary rotations, compute the pad_rotate_size
         # accordingly.  
         # NOTE: this padding allows us to crop portions of images wide enough to
@@ -42,9 +42,9 @@ class MODEL_CLASS:
             self.pad_rotate_size = self.pad_size
 
         #Other stuff
-        self.NameWeights = 'model_vgg_2_neurons_Weights'
-        self.SubmissionName = 'model_vgg_2_neurons_Submission.csv'
-        self.PredictionName = 'model_vgg_2_neurons_prediction'
+        self.NameWeights = 'model_RNN_Weights'
+        self.SubmissionName = 'model_RNN_Submission.csv'
+        self.PredictionName = 'model_RNN_prediction'
 
 
 
@@ -69,8 +69,8 @@ class MODEL_CLASS:
             # will select a random pixel in the image and crop around it a 
             # square of the correct size. To be able to crop we select pixels in 
             # between low and high
-            low = self.pad_rotate_size + self.patch_size//2
-            high = self.pad_rotate_size + self.train_shape - self.patch_size//2
+            low=self.pad_rotate_size + self.patch_size // 2
+            high = self.pad_rotate_size + self.train_shape - self.patch_size // 2
 
             for i in range(self.batch_size):
                 # Select a random image
@@ -79,21 +79,18 @@ class MODEL_CLASS:
                 x_coord = np.random.randint(low=low, high = high ) 
                 y_coord = np.random.randint(low=low, high = high )
                 # Crop around the random pixel (imgs)
-                X_temp = X[idx, 
-                  x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
-                  y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size]
+                X_temp = X[idx,x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
+                            y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size]
                 # Arbitrary rotation and correct crop of X_temp
                 degree = np.random.choice(180)
                 X_temp = scipy.ndimage.interpolation.rotate(X_temp, degree)
                 X_temp = crop_center(X_temp,self.input_size,self.input_size)
                 # Data augmentation
-                X_temp = data_augmentation(X_temp, False, 
-                                      self.FLIP_FLAG, self.BRIGHT_CONTRAST_FLAG)
+                X_temp = data_augmentation(X_temp, False, self.FLIP_FLAG, self.BRIGHT_CONTRAST_FLAG)
                 X_batch[i] = X_temp
                 # Crop around the random pixel (gt_imgs)
-                gt_temp = Y[idx,
-                  x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
-                  y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size] 
+                gt_temp = Y[idx,x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
+                                y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size] 
                 # Arbitrary rotation and correct crop of gt_temp
                 # Same degree
                 gt_temp = scipy.ndimage.interpolation.rotate(gt_temp, degree)
@@ -107,47 +104,66 @@ class MODEL_CLASS:
     ############################################################################
     ###########              MODEL CREATION              #######################
     ############################################################################
-    def CreateModel(self):     
-        model = Sequential()
+    def CreateModel(self):  
+        ########################################################################   
+        ########## root (X0): conv, pooling, conv, pooling  ####################
+        inputs = Input(shape=(self.input_size, self.input_size, 3))
+        x0 = Convolution2D(32, (5,5), 
+                        input_shape = ( self.input_size, self.input_size, 3),
+                        padding = 'SAME', activation = 'relu',
+                        kernel_initializer = 
+                        K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                        )                              (inputs)
+        x0 = Convolution2D(32, (5,5),
+                        padding = 'SAME', activation = 'relu',
+                        kernel_initializer = 
+                        K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                        )                              (x0)
+        x0 = MaxPooling2D(pool_size = self.pool_size)  (x0)
+        x0 = Dropout(0.5)                              (x0)
 
-        # BLOCK 1: 2 conv + pooling        
-        model.add(Convolution2D(32, (3,3), 
-                         input_shape = ( self.input_size, self.input_size, 3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(Convolution2D(32, (3,3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(MaxPooling2D(pool_size=self.pool_size))
+        x0 = Convolution2D(64, (3,3),
+                        padding = 'SAME', activation = 'relu',
+                        kernel_initializer = 
+                        K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                        )                              (x0)
+        x0 = MaxPooling2D(pool_size = self.pool_size)  (x0)
+        x0 = Dropout(0.5)                              (x0)
 
-        # BLOCK 2: 2 conv + pooling
-        model.add(Convolution2D(64, (3,3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(Convolution2D(64, (3,3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(MaxPooling2D(pool_size=self.pool_size))
+        ########################################################################
+        ########### left (xl) : conv, pooling, conv, pooling ###################
+        xl = Convolution2D(128, (3,3), 
+                        padding = 'SAME', activation = 'relu',
+                        kernel_initializer = 
+                        K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                        )                              (x0)
+        xl = MaxPooling2D(pool_size = self.pool_size)  (xl)
+        xl = Dropout(0.5)                              (xl)
 
-        # BLOCK 3: 3 conv + pooling
-        model.add(Convolution2D(128, (3,3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(Convolution2D(128, (3,3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(Convolution2D(128, (3,3),
-                                padding = 'SAME', activation = 'relu'
-                            ))
-        model.add(MaxPooling2D(pool_size=self.pool_size))
-        
-        # Final block      
-        model.add(Flatten())       
-        model.add(Dense(1024, activation='relu'))
-        model.add(Dropout(0.5))         
-        model.add(Dense(512, activation='relu'))
-        model.add(Dropout(0.5))       
-        model.add(Dense(units = 2, activation = 'softmax'))
+        xl = Convolution2D(256, (3,3),
+                        padding = 'SAME', activation = 'relu',
+                        kernel_initializer = 
+                        K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                        )                              (xl)
+        xl = MaxPooling2D(pool_size = self.pool_size)  (xl)
+        xl = Flatten()                                 (xl)
+
+        ########################################################################
+        ########### right (xr): do nothing  ####################################
+        xr = Flatten() (x0)
+
+        ########################################################################
+        ########### merge left and right  ######################################
+        concat = concatenate([xl, xr])                                         
+        concat = Dense(256, activation = 'relu', 
+                       kernel_regularizer = l2(self.reg)) (concat)
+        concat = Dropout(0.5)                             (concat)
+        concat = Dense(units = 2, activation = 'softmax') (concat)
+
+        ########################################################################
+        ########## create the model ############################################
+        model = Model(inputs=inputs, outputs=concat)
+
 
         # Optimizer and callbacks        
         opt = Adam(lr=self.learning_rate)

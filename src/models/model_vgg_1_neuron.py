@@ -1,4 +1,5 @@
 # VGG-like model with only one neuron in the final layer.
+# With this model (without post-processing) we obtained a F1-score of: 0.821
 
 from utilities import *
 from f1_score import *
@@ -7,6 +8,9 @@ class MODEL_CLASS:
 
     # INITIALIZATION: set some parameters of the model
     def __init__(self):
+        # Short description
+        self.WhoAmI = 'VGG-like model with only one neuron in the final layer.'
+
         # Model parameters
         self.pool_size = (2, 2)
         self.train_shape = 400 
@@ -24,7 +28,8 @@ class MODEL_CLASS:
 
         # Data augmentation parameters
         self.FLIP_FLAG = False # add random flips to the patches
-        self.BRIGHT_CONTRAST_FLAG = False # modify randomly the brightness and the constrast
+        self.BRIGHT_CONTRAST_FLAG = False # modify randomly the brightness and
+                                          # the constrast
         self.ROT_FLAG = False # add random 90 rotation
         # If there will be arbitrary rotations, compute the pad_rotate_size
         # accordingly.  
@@ -58,7 +63,8 @@ class MODEL_CLASS:
         '''
         while 1:        
             # Initialize the minibatch
-            X_batch = np.empty((self.batch_size, self.input_size, self.input_size, 3))
+            X_batch = np.empty((self.batch_size, self.input_size, 
+                                self.input_size, 3))
             Y_batch = np.empty(self.batch_size)
 
             # We want to select randomly the patches inside the images. So we 
@@ -75,12 +81,15 @@ class MODEL_CLASS:
                 x_coord = np.random.randint(low=low, high = high ) 
                 y_coord = np.random.randint(low=low, high = high )
                 # Crop around the random pixel (imgs)
-                X_temp = X[idx,x_coord - self.input_size//2:x_coord + self.input_size//2,
-                           y_coord - self.input_size//2:y_coord + self.input_size//2]
-                X_batch[i] = data_augmentation(X_temp, self.ROT_FLAG, self.FLIP_FLAG, self.BRIGHT_CONTRAST_FLAG)
+                X_temp = X[idx,
+                      x_coord - self.input_size//2:x_coord + self.input_size//2,
+                      y_coord - self.input_size//2:y_coord + self.input_size//2]
+                X_batch[i] = data_augmentation(X_temp, self.ROT_FLAG, 
+                                      self.FLIP_FLAG, self.BRIGHT_CONTRAST_FLAG)
                 # Crop around the random pixel (gt_imgs)
-                gt_temp = Y[idx,x_coord - self.patch_size//2:x_coord + self.patch_size//2,
-                            y_coord - self.patch_size//2:y_coord + self.patch_size//2]            
+                gt_temp = Y[idx,
+                      x_coord - self.patch_size//2:x_coord + self.patch_size//2,
+                      y_coord - self.patch_size//2:y_coord + self.patch_size//2]            
                 Y_batch[i] = patch_to_label(gt_temp)
             yield X_batch, Y_batch
 
@@ -94,13 +103,13 @@ class MODEL_CLASS:
         
         # BLOCK 1: 2 conv + pooling
         model.add(Convolution2D(32, (3,3), 
-                                input_shape = ( self.input_size, self.input_size, 3),
+                           input_shape = ( self.input_size, self.input_size, 3),
                                 padding = 'SAME', activation = 'relu'
                                 ))
         model.add(Convolution2D(32, (3,3),
                                 padding = 'SAME', activation = 'relu'
                                 ))
-        model.add(MaxPooling2D((2, 2), strides=self.pool_size))
+        model.add(MaxPooling2D(pool_size=self.pool_size))
 
         # BLOCK 2: 2 conv + pooling
         model.add(Convolution2D(64, (3,3),
@@ -109,7 +118,7 @@ class MODEL_CLASS:
         model.add(Convolution2D(64, (3,3),
                                 padding = 'SAME', activation = 'relu'
                                 ))
-        model.add(MaxPooling2D((2, 2), strides=self.pool_size))
+        model.add(MaxPooling2D(pool_size=self.pool_size))
 
         # BLOCK 3: 3 conv + pooling
         model.add(Convolution2D(128, (3,3),
@@ -121,7 +130,7 @@ class MODEL_CLASS:
         model.add(Convolution2D(128, (3,3),
                                 padding = 'SAME', activation = 'relu'
                                 ))
-        model.add(MaxPooling2D((2, 2), strides=self.pool_size))
+        model.add(MaxPooling2D(pool_size=self.pool_size))
 
         # Final BLOCK
         model.add(Flatten())       
@@ -132,10 +141,12 @@ class MODEL_CLASS:
         model.add(Dense(units = 1, activation = 'sigmoid'))
 
         # Optimizer and callbacks        
-        opt = Adam(lr=self.learning_rate) # Adam optimizer with default initial learning rate
+        opt = Adam(lr=self.learning_rate)
         lr_callback = ReduceLROnPlateau(monitor='acc', factor=0.5, patience=7,
-                                        verbose=1, mode='auto', min_delta=0.0001, cooldown=0, min_lr=0)
-        stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001, patience=10, verbose=1, mode='auto')
+                                    verbose=1, mode='auto', min_delta=0.0001, 
+                                    cooldown=0, min_lr=0)
+        stop_callback = EarlyStopping(monitor='acc', min_delta=0.0001,
+                                            patience=10, verbose=1, mode='auto')
         
         model.compile(loss=binary_crossentropy,
                     optimizer=opt,
@@ -173,5 +184,6 @@ class MODEL_CLASS:
 
         #Model
         model, _, _ = self.CreateModel()
-        print('\n Keras model summary')
+        print(f'\n{self.WhoAmI}')
+        print('Keras model summary')
         model.summary() 
