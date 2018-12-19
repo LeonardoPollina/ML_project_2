@@ -36,7 +36,8 @@ We are going to illustrate the structure of the present folder, its sub-folders 
     └── src
     │    ├── models                       
     │    |      ├── nome_modello_finale           # Final model
-    │    |      └── ...                           # Other models
+    │    |      ├── model_vgg_1_neuron.py         # VGG-like model with one neuron at the end  
+    │    |      └── model_RNN.py                  # Model that implements a recurrent NN
     |    ├── utilities.py                 
     |    ├── training_and_prediction.py
     |    ├── f1_score.py
@@ -87,9 +88,9 @@ Here you can find some of the models we tried. These models are defined using a 
 <ul>
     <li><b>nome_modello_finale.py:</b></li> 
     This is our final model. DESCRIPTION?
-    <li><b>One_unit_model.py:</b></li> 
+    <li><b>model_vgg_1_neuron.py:</b></li> 
     This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary and the F1-score is computed among the <code>metrics</code>.
-    <li><b>Recurrent_model.py:</b></li> 
+    <li><b>model_RNN.py:</b></li> 
     This is an example of one of the models containing alternative paths inside the architecture (i.e. Recurrent Neural Network).
 </ul>
  
