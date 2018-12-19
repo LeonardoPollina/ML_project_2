@@ -26,25 +26,29 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 We are going to illustrate the structure of the present folder, its sub-folders and the main files.
 
     .
-    ├── run.py                                    # Predict and generate a submission file
-    ├── config.py                                 # A couple of configuration parameters
-    ├── WeigthsFinalModel                         # Weights of the final model
+    ├── run.py                                 # Predict and generate a submission file
+    ├── config.py                              # A couple of configuration parameters
+    ├── WeigthsFinalModel                      # Weights of the final model
     ├── Notebooks                       
-    │      ├── FINAL_SUBMISSION_PROTOTYPE         # Training of the final model
-    │      ├── ONE_NEURON_PROTOTYPE               # Training with only one neuron at the end
-    │      └── Logistic_regression.ipynb          # Logistic regression
+    |   ├── FINAL_SUBMISSION_PROTOTYPE         # Training of the final model
+    │   ├── ONE_NEURON_PROTOTYPE               # Training with only one neuron at the end
+    │   └── Logistic_regression.ipynb          # Logistic regression
     └── src
-    │    ├── models                       
-    │    |      ├── nome_modello_finale           # Final model
-    │    |      ├── model_vgg_1_neuron.py         # VGG-like model with one neuron at the end  
-    │    |      └── model_RNN.py                  # Model that implements a recurrent NN
-    |    ├── utilities.py                 
-    |    ├── training_and_prediction.py
-    |    ├── f1_score.py
-    |    └── logistic_utilities.py
+    │   ├── models                       
+    │   |   ├── nome_modello_finale           # Final model
+    │   |   ├── model_vgg_1_neuron.py         # VGG-like model with one neuron at the end  
+    │   |   └── model_RNN.py                  # Model that implements a recurrent NN
+    |   ├── utilities.py                 
+    |   ├── training_and_prediction.py
+    |   ├── f1_score.py
+    |   └── logistic_utilities.py
     └── ReadME.md
 
 ## Notebooks folder
+    .                        
+    ├── Notebooks                       
+    │   └── ...        
+    .
 In this folder, there are the notebooks showing our main training procedures. These notebooks have already been run to avoid a waste of time for the reader. 
 
 <ul>
@@ -62,7 +66,10 @@ This notebook shows the training procedure we applied (80/20 train/validation) t
 </ul>
 
 ## src folder
-
+    .                        
+    ├── src                       
+    │   └── ...        
+    .
 <ul>
 <li><b>utilities.py</b>
     These functions are general utilities that do not rely on the class <code>MODEL_CLASS()</code>; the file is divided in the following sub-sections.
@@ -84,6 +91,11 @@ This notebook shows the training procedure we applied (80/20 train/validation) t
 </ul>
 
 ### models folder (IT SHOULD BE CLEAR THAT THIS IS INSIDE SRC FOLDER)
+    .                        
+    ├── src                       
+    │    ├── models
+    |    └── ...
+    .
 Here you can find some of the models we tried. These models are defined using a single class called <code>MODEL_CLASS()</code>. According to the definition of its attributes, different models can be implemented.
 <ul>
     <li><b>nome_modello_finale.py:</b></li> 
