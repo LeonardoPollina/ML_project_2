@@ -39,7 +39,7 @@ def train(X, Y, MODEL, validation_ratio = -1):
     if (validation_ratio <= 0) or (validation_ratio >= 1):
         #Some informations
         print('Training the model.')
-        print('Training images shape: ', X.shape) 
+        print('Training (padded) images shape: ', X.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}')
         print('No validation data.\n\n')
@@ -58,8 +58,8 @@ def train(X, Y, MODEL, validation_ratio = -1):
         print('Training the model.')
         print('Validation ratio: ', validation_ratio)
         X_tr, X_val, Y_tr, Y_val = split_data(X, Y, validation_ratio, seed = 1)
-        print('Training images shape: ', X_tr.shape) 
-        print('Validation images shape: ', X_val.shape) 
+        print('Training (padded) images shape: ', X_tr.shape) 
+        print('Validation (padded) images shape: ', X_val.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}\n\n')
         try:
@@ -127,7 +127,7 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont,
     if (validation_ratio <= 0) or (validation_ratio >= 1):
         #Some informations
         print('Restarting training...')
-        print('Training images shape: ', X.shape) 
+        print('Training (padded) images shape: ', X.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}')
         print('No validation data.\n\n')
@@ -146,8 +146,8 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont,
         print('Restarting training...')
         print('Validation ratio: ', validation_ratio)
         X_tr, X_val, Y_tr, Y_val = split_data(X, Y, validation_ratio, seed = 1)
-        print('Training images shape: ', X_tr.shape) 
-        print('Validation images shape: ', X_val.shape) 
+        print('Training (padded) images shape: ', X_tr.shape) 
+        print('Validation (padded) images shape: ', X_val.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
         print(f'Steps per epoch: {MODEL.steps_per_epoch}\n\n')
         try:
