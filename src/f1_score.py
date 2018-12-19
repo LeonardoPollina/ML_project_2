@@ -1,11 +1,12 @@
-#########################################################################
-#This code is taken from the GitHub repository of Keras, that has removed
-#the f1_score metric since the version 2.0. We have slightly modified the
-#code to be able to monitor the F1 score instead of the accuracy, since
-#our goal is to have a good F1 score.
-#
-#Our changes are at lines 20-21 and 37-38
-#########################################################################
+################################################################################
+# This code is taken from the GitHub repository of Keras, that has removed the #
+# F1-score metric since the version 2.0. We have slightly modified the code to #
+# be able to monitor the F1 score instead of the accuracy, since our goal is   #
+# to have a good F1-score.                                                     #
+#                                                                              #
+# We tried to extend the changes to handle even in the case of a model with 2  #
+# neurons in the final layer, but without success.                             #
+################################################################################
 
 from keras import backend as K
 
@@ -16,10 +17,10 @@ def precision(y_true, y_pred0):
     how many selected items are relevant.
     """
     
-    #OUR FIRST CHANGE TO THE ORIGINAL CODE FROM KERAS STARTS HERE...
+    # OUR FIRST CHANGE TO THE ORIGINAL CODE FROM KERAS STARTS HERE... ##########
     y_pred = y_pred0 > 0.5 
     y_pred = K.cast(y_pred, 'float32')
-    # ... AND ENDS HERE ############################################
+    # ... AND ENDS HERE ########################################################
     
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     predicted_positives = K.sum(K.round(K.clip(y_pred, 0, 1)))
@@ -33,10 +34,10 @@ def recall(y_true, y_pred0):
     how many relevant items are selected.
     """
     
-    #OUR SECOND CHANGE TO THE ORIGINAL CODE FROM KERAS STARTS HERE...
+    # OUR SECOND CHANGE TO THE ORIGINAL CODE FROM KERAS STARTS HERE... #########
     y_pred = y_pred0 > 0.5 
     y_pred = K.cast(y_pred, 'float32')
-    # ... AND ENDS HERE ##########################################
+    # ... AND ENDS HERE ########################################################
     
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
