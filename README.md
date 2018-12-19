@@ -74,8 +74,8 @@ This notebook shows the training procedure that we applied (80/20 train/validati
 <li><b>training_and_prediction.py</b></li>
     These functions rely on the class <code>MODEL_CLASS()</code>. As the name of the file suggests, these methods are used to train a Keras model, generate a prediction and handle the prediction results.
 <li><b>f1_score.py</b></li>
-    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. We implemented in this file our customed F1-score metrics starting from the functions of the old version of Keras. 
-    <b>NOTE</b>: This can be only used in the case of a model with one unit in the final layer.
+    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. We implemented in this file our customed F1-score metric starting from the functions of the old version of Keras. 
+    <br><b>NOTE</b>: This can be only used in the case of a model with one unit in the final layer.
 <li><b>logistic_utilities.py</b></li>
     These are the functions used in order to train the logistic model.
 </ul>
