@@ -82,7 +82,7 @@ This notebook shows the training procedure we applied (80/20 train/validation) t
     These are the functions used in order to train the logistic regression model.
 </ul>
 
-## models folder
+### models folder (IT SHOULD BE CLEAR THAT THIS IS INSIDE SRC FOLDER)
 Here you can find some of the models we tried. These models are defined using a single class called <code>MODEL_CLASS()</code>. According to the definition of its attributes, different models can be implemented.
 <ul>
     <li><b>nome_modello_finale.py:</b></li> 
