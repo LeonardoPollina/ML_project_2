@@ -25,7 +25,6 @@ class MODEL_CLASS:
             self.pad_rotate_size = self.pad_size
 
         # Training parameters
-        self.reg = 1e-5  
         self.learning_rate = 0.001
         self.epochs = 40
         self.batch_size = 128
@@ -35,12 +34,12 @@ class MODEL_CLASS:
         # Data augmentation parameters
         self.FLIP_FLAG = True # add random flips to the patches
         self.BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
-        
+
 
         #Other stuff
-        self.NameWeights = 'model_2b_Weights'
-        self.SubmissionName = 'model_2b_Submission.csv'
-        self.PredictionName = 'model_2b_prediction'
+        self.NameWeights = 'model_vgg_1912_Weights'
+        self.SubmissionName = 'model_vgg_1912_Submission.csv'
+        self.PredictionName = 'model_vgg_1912_prediction'
 
 
 
@@ -100,37 +99,43 @@ class MODEL_CLASS:
     ############################################################################
     def CreateModel(self):     
         model = Sequential()
-        
-        model.add(Convolution2D(64, (5,5), 
+
+        # BLOCK 1: 2 conv + pooling        
+        model.add(Convolution2D(32, (5,5), 
                                 input_shape = ( self.input_size, self.input_size, 3),
-                                padding = 'SAME', activation = 'relu',
-                                kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                                padding = 'SAME', activation = 'relu'
                             ))
-        
-        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-        
+        model.add(Convolution2D(32, (5,5),
+                                padding = 'SAME', activation = 'relu'
+                            ))
+        model.add(MaxPooling2D((2, 2), strides=self.pool_size))
+        model.add(Dropout(0.5))
+
+        # BLOCK 2: 2 conv + pooling
         model.add(Convolution2D(64, (3,3),
-                                padding = 'SAME', activation = 'relu',
-                                kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                                padding = 'SAME', activation = 'relu'
                             ))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-        
+        model.add(Convolution2D(64, (3,3),
+                                padding = 'SAME', activation = 'relu'
+                            ))
+        model.add(MaxPooling2D((2, 2), strides=self.pool_size))
+        model.add(Dropout(0.5))
+
+        # BLOCK 3: 3 conv + pooling
         model.add(Convolution2D(128, (3,3),
-                                padding = 'SAME', activation = 'relu',
-                                kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+                                padding = 'SAME', activation = 'relu'
                             ))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
-        
-        model.add(Convolution2D(256, (3,3),
-                                padding = 'SAME', activation = 'relu',
-                                kernel_initializer = K_init.RandomUniform(minval=-0.05, maxval=0.05, seed=1)
+        model.add(Convolution2D(128, (3,3),
+                                padding = 'SAME', activation = 'relu'
                             ))
-        model.add(MaxPooling2D((2, 2), strides=(2, 2)))
+        model.add(Convolution2D(128, (3,3),
+                                padding = 'SAME', activation = 'relu'
+                            ))
+        model.add(MaxPooling2D((2, 2), strides=self.pool_size))
         
-        model.add(Flatten())
-        model.add(Dense(512, activation = 'relu', kernel_regularizer = l2(self.reg)))
-        model.add(Dropout(0.5))         
-        model.add(Dense(256, activation = 'relu', kernel_regularizer = l2(self.reg)))
+        # Final block      
+        model.add(Flatten())   
+        model.add(Dense(256, activation='relu'))
         model.add(Dropout(0.5))       
         model.add(Dense(units = 2, activation = 'softmax'))
 

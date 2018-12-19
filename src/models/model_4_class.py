@@ -15,6 +15,9 @@ class MODEL_CLASS:
 
         # If there will be arbitrary rotations, compute the pad_rotate_size
         # accordingly.  
+        # NOTE: this padding allows us to crop portions of images wide enough to
+        #       be rotated of any degree and then to crop from them a portion of
+        #       the desired size, which is (input_size x input_size) 
         self.ARB_ROT_FLAG = True
         if self.ARB_ROT_FLAG:
             self.pad_rotate_size = int( self.input_size / np.sqrt(2) ) + 2
@@ -157,28 +160,31 @@ class MODEL_CLASS:
     ############################################################################
     ###########            PRINT INFORMATIONS            #######################
     ############################################################################
-    def summary(self):
-        print('Main model attributes:')
-        print('\tpatch_size = ', self.patch_size)
-        print('\tinput_size = ', self.input_size)
-        print('\tpad_size = ', self.pad_size)
-        print('\tpad_rotate_size = ', self.pad_rotate_size)
-        print('\tfinal_layer_units = ', self.final_layer_units)
-        print('\tpool_size = ', self.pool_size)
+    def summary(self, main_attributes = 1, training_params = 1, other = 1):
+        if main_attributes:
+            print('Main model attributes:')
+            print('\tpatch_size = ', self.patch_size)
+            print('\tinput_size = ', self.input_size)
+            print('\tpad_size = ', self.pad_size)
+            print('\tpad_rotate_size = ', self.pad_rotate_size)
+            print('\tfinal_layer_units = ', self.final_layer_units)
+            print('\tpool_size = ', self.pool_size)
 
         # Training parameters
-        print('\nTraining parameters:')
-        print('\treg = ', self.reg)
-        print('\tlearning_rate = ', self.learning_rate)
-        print('\tepochs = ', self.epochs)
-        print('\tbatch_size = ', self.batch_size)
-        print('\tsteps_per_epoch = ', self.steps_per_epoch)
+        if training_params:
+            print('\nTraining parameters:')
+            print('\treg = ', self.reg)
+            print('\tlearning_rate = ', self.learning_rate)
+            print('\tepochs = ', self.epochs)
+            print('\tbatch_size = ', self.batch_size)
+            print('\tsteps_per_epoch = ', self.steps_per_epoch)
 
         #Other stuff
-        print('\nOther attributes:')
-        print('\tNameWeights = ', self.NameWeights)
-        print('\tSubmissionName = ', self.SubmissionName)
-        print('\tPredictionName = ', self.PredictionName)
+        if other:
+            print('\nOther attributes:')
+            print('\tNameWeights = ', self.NameWeights)
+            print('\tSubmissionName = ', self.SubmissionName)
+            print('\tPredictionName = ', self.PredictionName)
 
         #Model
         model, _, _ = self.CreateModel()

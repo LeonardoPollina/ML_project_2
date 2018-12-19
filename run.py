@@ -1,5 +1,9 @@
 from config import *
-
+import sys
+sys.path.insert(0,'./src/')
+sys.path.insert(0,'./src/models')
+from training_and_prediction import *
+from utilities import *
 print('-----------------------------------------------------------------------')
 print('CONFIG')
 print('Root directory: ', ROOT_DIR)
@@ -8,19 +12,10 @@ print('Submission filename: ', SubmissionName)
 
 print('\n\n')
 print('-----------------------------------------------------------------------')
-print('IMPORT')
-import sys
-sys.path.insert(0,'./src/')
-sys.path.insert(0,'./src/models')
-from training_and_prediction import *
-from utilities import *
-
-print('\n\n')
-print('-----------------------------------------------------------------------')
 print('GENERATE THE MODEL')
-from model_vgg_1912 import MODEL_CLASS
+from model_vgg_2_neurons_class import MODEL_CLASS
 MODEL = MODEL_CLASS()
-MODEL.summary()
+MODEL.summary(main_attributes=1, training_params=0, other=0)
 
 print('\n\n')
 print('-----------------------------------------------------------------------')
