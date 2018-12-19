@@ -29,7 +29,8 @@ class MODEL_CLASS:
 
         # Data augmentation parameters
         self.FLIP_FLAG = True # add random flips to the patches
-        self.BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness and the constrast
+        self.BRIGHT_CONTRAST_FLAG = True # modify randomly the brightness 
+                                         # and the constrast
         # If there will be arbitrary rotations, compute the pad_rotate_size
         # accordingly.  
         # NOTE: this padding allows us to crop portions of images wide enough to
@@ -69,8 +70,8 @@ class MODEL_CLASS:
             # will select a random pixel in the image and crop around it a 
             # square of the correct size. To be able to crop we select pixels in 
             # between low and high
-            low=self.pad_rotate_size + self.patch_size // 2
-            high = self.pad_rotate_size + self.train_shape - self.patch_size // 2
+            low=self.pad_rotate_size + self.patch_size//2
+            high = self.pad_rotate_size + self.train_shape - self.patch_size//2
 
             for i in range(self.batch_size):
                 # Select a random image
@@ -79,18 +80,21 @@ class MODEL_CLASS:
                 x_coord = np.random.randint(low=low, high = high ) 
                 y_coord = np.random.randint(low=low, high = high )
                 # Crop around the random pixel (imgs)
-                X_temp = X[idx,x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
-                            y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size]
+                X_temp = X[idx,
+                  x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
+                  y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size]
                 # Arbitrary rotation and correct crop of X_temp
                 degree = np.random.choice(180)
                 X_temp = scipy.ndimage.interpolation.rotate(X_temp, degree)
                 X_temp = crop_center(X_temp,self.input_size,self.input_size)
                 # Data augmentation
-                X_temp = data_augmentation(X_temp, False, self.FLIP_FLAG, self.BRIGHT_CONTRAST_FLAG)
+                X_temp = data_augmentation(X_temp, False, self.FLIP_FLAG, 
+                                                      self.BRIGHT_CONTRAST_FLAG)
                 X_batch[i] = X_temp
                 # Crop around the random pixel (gt_imgs)
-                gt_temp = Y[idx,x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
-                                y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size] 
+                gt_temp = Y[idx,
+                  x_coord - self.pad_rotate_size:x_coord + self.pad_rotate_size,
+                  y_coord - self.pad_rotate_size:y_coord + self.pad_rotate_size] 
                 # Arbitrary rotation and correct crop of gt_temp
                 # Same degree
                 gt_temp = scipy.ndimage.interpolation.rotate(gt_temp, degree)
