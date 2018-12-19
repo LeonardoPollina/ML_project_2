@@ -18,7 +18,7 @@ class MODEL_CLASS:
         # Training parameters 
         self.learning_rate = 0.001
         self.epochs = 40
-        self.batch_size = 125
+        self.batch_size = 128
         self.steps_per_epoch = 250
 
 
