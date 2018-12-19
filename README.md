@@ -54,9 +54,11 @@ In this folder, there are the notebooks showing our main training procedures. Th
 This notebook shows the training procedure to find the best hyperparameters (degree of polynomial expansion and regularization parameter) of the regularized logistic regression. This classifier was used only at the beginning to have a starting F1-score to compare with the more advanced (and computational demanding) CNN models. 
 
 <li><b>FINAL_MODEL_PROTOTYPE </b></li>
+
 This notebook shows the training procedure we applied (80/20 train/validation) to our best model. TO ADD WHICH MODEL THIS IS
 
 <li><b>ONE_NEURON_PROTOTYPE </b></li>
+
 This notebook shows the training procedure we applied (80/20 train/validation) to a model among those implemented with only one neuron in the output layer.
 </ul>
 
@@ -88,6 +90,6 @@ Here you can find some of the models we tried. These models are defined using a 
     <li><b>One_unit_model.py:</b></li> 
     This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary\ and the F1-score is computed among the <code>metrics</code>.
     <li><b>Recurrent_model.py:</b></li> 
-    This is an example of one of the models we tried involving skip connections (i.e. recurrent neural network).
+    This is an example of one of the models containing alternative paths inside the architecture (i.e. Recurrent Neural Network).
 </ul>
  
