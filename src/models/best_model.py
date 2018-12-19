@@ -42,9 +42,9 @@ class MODEL_CLASS:
             self.pad_rotate_size = self.pad_size
 
         #Other stuff
-        self.NameWeights = 'model_vgg_2_neurons_Weights'
-        self.SubmissionName = 'model_vgg_2_neurons_Submission.csv'
-        self.PredictionName = 'model_vgg_2_neurons_prediction'
+        self.NameWeights = 'model_best_Weights'
+        self.SubmissionName = 'model_best_Submission.csv'
+        self.PredictionName = 'model_best_prediction'
 
 
 
