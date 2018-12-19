@@ -204,14 +204,14 @@ class MODEL_CLASS:
             print('\tbatch_size = ', self.batch_size)
             print('\tsteps_per_epoch = ', self.steps_per_epoch)
 
-        #Other stuff
+        # Other stuff
         if other:
             print('\nOther attributes:')
             print('\tNameWeights = ', self.NameWeights)
             print('\tSubmissionName = ', self.SubmissionName)
             print('\tPredictionName = ', self.PredictionName)
 
-        #Model
+        # Model
         model, _, _ = self.CreateModel()
         print(f'\n{self.WhoAmI}')
         print('Keras model summary')

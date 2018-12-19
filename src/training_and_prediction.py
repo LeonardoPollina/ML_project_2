@@ -37,7 +37,7 @@ def train(X, Y, MODEL, validation_ratio = -1):
     
     # Training...
     if (validation_ratio <= 0) or (validation_ratio >= 1):
-        #Some informations
+        # Some informations
         print('Training the model.')
         print('Training (padded) images shape: ', X.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
@@ -54,7 +54,7 @@ def train(X, Y, MODEL, validation_ratio = -1):
             pass
 
     else:
-        #Some informations
+        # Some informations
         print('Training the model.')
         print('Validation ratio: ', validation_ratio)
         X_tr, X_val, Y_tr, Y_val = split_data(X, Y, validation_ratio, seed = 1)
@@ -208,7 +208,7 @@ def ComputeLocalF1Score(X, Y, MODEL, NameWeights):
     model, _, _ = MODEL.CreateModel()
     model.load_weights(NameWeights)
 
-    #Create suitable input/labels for the model
+    # Create suitable input/labels for the model
     val_inputs = imgs_to_inputs(X, MODEL.train_shape, MODEL.patch_size, 
                                 MODEL.input_size)
     val_gt_patches = [img_crop(Y[i], MODEL.patch_size, MODEL.patch_size) 
@@ -219,12 +219,12 @@ def ComputeLocalF1Score(X, Y, MODEL, NameWeights):
     val_true_labels = np.asarray([value_to_class(np.mean(val_gt_patches[i])) 
                         for i in range(len(val_gt_patches))])
 
-    #Predict
+    # Predict
     print('Predicting... ')
     val_prediction = model.predict(val_inputs)
     print('Done!')
 
-    #Compute f1_Score
+    # Compute f1_Score
     if MODEL.final_layer_units == 1:
         val_predicted_labels = ( (val_prediction > 0.5) * 1 ).flatten()
     if MODEL.final_layer_units == 2:
@@ -299,7 +299,7 @@ def PredictAndPlot(img, MODEL, NameWeights, PLOT = True):
     model, _, _ = MODEL.CreateModel()
     model.load_weights(NameWeights)
 
-    #Predict
+    # Predict
     dim = img.shape[0]
     img_reshaped = img.reshape((1,dim,dim,3))
     img_reshaped = padding_imgs(img_reshaped,MODEL.pad_size)

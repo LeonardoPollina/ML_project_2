@@ -33,6 +33,21 @@ from keras.layers import BatchNormalization
 # percentage of pixels > 1 required to assign a foreground label to a patch
 foreground_threshold = 0.25 
 
+def value_to_class(v):
+    df = np.sum(v)
+    if df > foreground_threshold:
+        return 1
+    else:
+        return 0
+
+# assign a label to a patch
+def patch_to_label(patch):
+    df = np.mean(patch)
+    if df > foreground_threshold:
+        return 1
+    else:
+        return 0
+
 def load_image(infilename):
     data = mpimg.imread(infilename)
     return data
@@ -59,6 +74,22 @@ def concatenate_images(img, gt_img):
         cimg = np.concatenate((img8, gt_img_3c), axis=1)
     return cimg
 
+def extract_features(img):
+    '''Extract 6-dimensional features consisting of average RGB color as well 
+    as variance'''
+    feat_m = np.mean(img, axis=(0,1))
+    feat_v = np.var(img, axis=(0,1))
+    feat = np.append(feat_m, feat_v)
+    return feat
+
+def extract_img_features(filename, patch_size = 16):
+    '''Extract features for a given image'''
+    img = load_image(filename)
+    img_patches = img_crop(img, patch_size, patch_size)
+    X = np.asarray([ extract_features(img_patches[i]) for i in 
+        range(len(img_patches))])
+    return X
+
 def img_crop(im, w, h):
     list_patches = []
     imgwidth = im.shape[0]
@@ -72,14 +103,6 @@ def img_crop(im, w, h):
                 im_patch = im[j:j+w, i:i+h, :]
             list_patches.append(im_patch)
     return list_patches
-
-def value_to_class(v):
-    df = np.sum(v)
-    if df > foreground_threshold:
-        return 1
-    else:
-        return 0
-
     
 def label_to_img(imgwidth, imgheight, w, h, labels):
     ''' From a vector of labels creates an image of (imgwidth x imgheight).
@@ -92,14 +115,6 @@ def label_to_img(imgwidth, imgheight, w, h, labels):
             im[j:j+w, i:i+h] = labels[idx]
             idx = idx + 1
     return im
-
-# assign a label to a patch
-def patch_to_label(patch):
-    df = np.mean(patch)
-    if df > foreground_threshold:
-        return 1
-    else:
-        return 0
 
 def make_img_overlay(img, predicted_img):
     w = img.shape[0]

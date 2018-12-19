@@ -1,30 +1,18 @@
 from sklearn import linear_model
 from sklearn.preprocessing import PolynomialFeatures
-from sklearn.metrics import f1_score as f1_score_sklearn
 from utilities import *
 
-def extract_features(img):
-    '''Extract 6-dimensional features consisting of average RGB color as well 
-    as variance'''
-    feat_m = np.mean(img, axis=(0,1))
-    feat_v = np.var(img, axis=(0,1))
-    feat = np.append(feat_m, feat_v)
-    return feat
-
-
-def extract_img_features(filename, patch_size = 16):
-    '''Extract features for a given image'''
-    img = load_image(filename)
-    img_patches = img_crop(img, patch_size, patch_size)
-    X = np.asarray([ extract_features(img_patches[i]) for i in 
-        range(len(img_patches))])
-    return X
-
-
 def build_k_indices(data, k_fold, seed):
-    """
-    Build k indices for k-fold.
-    """
+    '''Build k indices for k-fold.
+    
+    Parameters:
+    data: np.array containing the data
+    k_fold: number of folds
+    seed: seed of the NumPy random generator
+
+    Returns:
+    Array containing the indices of the k_fold folds
+    '''
     num_row = data.shape[0]
     interval = int(num_row / k_fold)
     np.random.seed(seed)
@@ -34,10 +22,18 @@ def build_k_indices(data, k_fold, seed):
     return np.array(k_indices)
 
 def cross_validation(y, x, k_indices, lambda_):
-    '''
-    Cross validation using logistic regression computed on train and validation 
+    '''Cross validation using logistic regression computed on train and validation 
     sets defined by k_indices.
-    Return f1 of the validation sets averaged on the k folds.
+
+    Parameters:
+    y: true values
+    x: data
+    k_indices: np array containing the indices of the k folds
+    lambda_: regularization parameter. Used as an argument in the sklearn 
+            function LogisticRegression
+
+    Returns:
+    F1-score of the validation sets averaged on the k folds.
     '''
     folds = k_indices.shape[0]
     f1 = np.zeros(folds)
@@ -61,9 +57,22 @@ def cross_validation(y, x, k_indices, lambda_):
     return np.mean(f1)
 
 def grid_search_hyperparam(y, tx, lambdas, degrees, verbose = 2):
-    '''Grid search with cross validation used to estimate the best 
+    '''Grid search with 4-folds cross validation used to estimate the best 
     hyperparameters for logistic regression, that are lambda and the degree for 
     polynomial expansion. 
+
+    Parameters:
+    y: true values
+    x: data
+    lambdas: regularization parameters to try. Will be used as an argument in 
+            the sklearn function LogisticRegression
+    degrees: degrees of polynomial augmentation to try
+    verbose: verbosity level (0,1,2)
+
+    Returns:
+    best_lambda: lambda that achieves the maximum F1-score
+    best_degree: degree that achieves the maximum F1-score
+    max_f1: maximum F1-score achieved
     '''
     f1 = np.zeros((len(lambdas), len(degrees)))
     #We iterate on the hyperparameters to find the best combination
@@ -92,14 +101,20 @@ def grid_search_hyperparam(y, tx, lambdas, degrees, verbose = 2):
         print('Max F1-score: ', max_f1)
     return best_lambda, best_degree, max_f1
 
-
 def predict_and_submit_logistic(degree, log_model, SubmissionName, 
                         patch_size = 16, root_dir = '../../Data/', verbose = 1):
     '''Generate the submission file in case of logistic regression. 
     The test images are loaded and then the data to feed the log_model are 
     generated.
 
-    The submission is saved in a file called SubmissionName.
+    Parameters:
+    degree: degree of polynomial expansion (with cross terms)
+    log_model: LogisticRegression sklearn model (already trained)
+    SubmissionName: name of the file containing the submission that will be
+        generated
+    patch_size: dimensions of the patches that has to be given to the model
+    root_dir: directory containing the images
+    verbose: verbosity level
     '''
     if verbose: print('Loading test images...')
     test_images = pick_test_images(root_dir)
