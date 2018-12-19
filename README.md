@@ -18,7 +18,7 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 
 # Generate the prediction
 1. Check the version of your libraries and install the missing ones.
-2. Open the `config.py` file and select the following parameters: <code>ROOT_DIR</code> (directory containing the set images) and <code>SubmissionName</code> (name of the file where the submission will be saved).
+2. Open the `config.py` file and select the following parameters: <code>ROOT_DIR</code> (directory containing the set images), <code>NameWeights</code> (name of the file were the weights are saved) and <code>SubmissionName</code> (name of the file where the submission will be saved).
 3. Execute the script `run.py`. 
 
 # Content description
