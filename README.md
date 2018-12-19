@@ -30,8 +30,8 @@ We are going to illustrate the structure of the folder and then to describe the 
     ├── run.py                                    # Predict and generate a submission file
     ├── config.py                                 # A couple of configuration parameters
     ├── Notebooks                       
-    │      ├── qualcosa1                          # Training of the final model
-    │      ├── qualcosa2                          # Training with only one neuron at the end
+    │      ├── FINAL_SUBMISSION_PROTOTYPE         # Training of the final model
+    │      ├── ONE_NEURON_PROTOTYPE               # Training with only one neuron at the end
     │      └── Logistic_regression.ipynb          # Logistic regression
     └── src
     │    ├── models                       
@@ -51,14 +51,11 @@ In this folder, there are notebooks that show our main training procedures. They
 
 Here it is shown the training procedure in order to find the best hyperparameters (degree of polynomial expansion and regularization parameter) of the regularized logistic regression. We used this classifier only at the very beginning, to have a starting F1-score to compare with the more advanced (and computational demanding) NN models. 
 
-<li><b>nome(final model)</b></li>
+<li><b>FINAL_MODEL_PROTOTYPE </b></li>
+This notebook shows the training procedure that we applied (80/20 train/validation), applied on our best model.
 
-Final model
-
-<li><b>nome(example of CNN with x final_layer_units)</b></li>
-
-bla bla bla
-
+<li><b>ONE_NEURON_PROTOTYPE </b></li>
+This notebook shows the training procedure that we applied (80/20 train/validation), applied on one of the models that we tried among the ones with only one neuron in the final layer.
 </ul>
 
 ## src folder
