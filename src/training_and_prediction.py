@@ -237,7 +237,7 @@ def ComputeLocalF1Score(X, Y, MODEL, NameWeights):
 
 
 def PredictAndSubmit(MODEL, NameWeights, SubmissionName, PredictionName,
-                     root_dir = '../Data'):
+                        root_dir = '../Data', verbose = 1):
     '''This function loads the test images and performs the prediction.
 
     Parameters: 
@@ -249,24 +249,25 @@ def PredictAndSubmit(MODEL, NameWeights, SubmissionName, PredictionName,
 
     Returns: void
     '''
-    print('Loading test images')
+    if verbose: print('Loading test images')
     test_images = np.asarray(pick_test_images(root_dir))
     test_images = padding_imgs(np.array(test_images),MODEL.pad_size)
     
     # Prepare the input for the prediction
     test_inputs = imgs_to_inputs(test_images, 608, MODEL.patch_size,
                                 MODEL.input_size)
-    print('Inputs for the test are ready. Shape: ', test_inputs.shape)
+    if verbose: print('Inputs for the test are ready. Shape: ', 
+                        test_inputs.shape)
     
-    print('Load the weights of the model from: ', NameWeights)
+    if verbose: print('Load the weights of the model from: ', NameWeights)
     model, _,_ = MODEL.CreateModel()
     model.load_weights(NameWeights)
 
-    print('Predicting...')
+    if verbose: print('Predicting...')
     test_prediction = model.predict(test_inputs)
-    print('Done!')
+    if verbose: print('Done!')
     
-    print('Generating submission and prediction (pickle) file...')
+    if verbose: print('Generating submission and prediction (pickle) file...')
     if MODEL.final_layer_units == 1:
         test_predicted_labels = ( (test_prediction > 0.5) * 1 ).flatten()
     if MODEL.final_layer_units == 2:
@@ -279,8 +280,8 @@ def PredictAndSubmit(MODEL, NameWeights, SubmissionName, PredictionName,
     with open(PredictionName, 'wb') as f:
         pickle.dump(test_predicted_labels, f)
 
-    print('Submission saved in: ', SubmissionName)
-    print('Prediction saved in ', PredictionName)
+    if verbose: print('Submission saved in: ', SubmissionName)
+    if verbose: print('Prediction saved in ', PredictionName)
 
 
 def PredictAndPlot(img, MODEL, NameWeights, PLOT = True):

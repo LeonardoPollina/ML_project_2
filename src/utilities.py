@@ -135,64 +135,50 @@ def split_data(x, y, ratio, seed=1):
     return x_tr, x_te, y_tr, y_te
 
 
-
 ################################################################################
-####################### OUR FUNCTIONS ##########################################
+#######################  LOADING DATA  #########################################
 ################################################################################
 
-def get_idx_split_data(N, ratio, seed=1):
-    '''Split the dataset based on the split ratio.
-    
-    Parameters:
-    N: the number of data that we need to split
-    ratio: ratio of the splitting
-    seed: numpy random seed selection
-    Returns:
-    idx_tr, idx_val: random indices to select the train/validation set.
-    '''
-    #Set seed
-    np.random.seed(seed)
-    idx_permuted = np.random.permutation(np.arange(N))
-    #Used to compute how many samples correspond to the desired ratio.
-    limit = int(N*ratio)
-    idx_tr = idx_permuted[:limit]
-    idx_val = idx_permuted[(limit+1):]
-    return idx_tr, idx_val
-    
-def MY_masks_to_submission(submission_filename, masks1D):
-    ''' Converts the matrix containing all the labels into a submission file.
-    
+def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
+    ''' Load images and pad them using mirror boundary conditions. If pad_size
+    is zero, then the images are not padded.
+
     Parameters: 
-    submission_filename: name of the file that will contain the submission
-    masks1D: 2-dimensional np array. The ith row contains the labels of 
-        the ith test image
-    '''
-    with open(submission_filename, 'w') as f:
-        f.write('id,prediction\n')
-        for idx,fn in enumerate(masks1D):
-            f.writelines('{}\n'.format(s) for s in 
-                                        MY_mask_to_submission_strings(fn,idx))
-      
-    
-def MY_mask_to_submission_strings(mask1D, img_number):
-    '''To be called inside MY_masks_to_submission.
-    Write the informations of the image img_number, starting from the 1D array 
-    containing the predicted labels of the image.
-    '''
-    patch_size = 16
-    test_size = 608
-    im = label_to_img(test_size, test_size, patch_size, patch_size, mask1D)
-    for j in range(0, im.shape[1], patch_size):
-        for i in range(0, im.shape[0], patch_size):
-            patch = im[i:i + patch_size, j:j + patch_size]
-            label = patch_to_label(patch)
-            yield("{:03d}_{}_{},{}".format(img_number+1, j, i, label))
+    pad_size: padding size, boundary conditions
+    root_dir = folder containining the training images and the set images
+    verbose: verbosity level
 
-            
+    return:
+    imgs: 4 dimensional np array containing RGB images
+    gt_imgs: 3 dimentsional np array containing groundtruth images
+    '''
+    # Load images
+    image_dir = root_dir + "/training/images/"
+    files = os.listdir(image_dir)
+    n = len(files)
+    if verbose : print("Loading " + str(n) + " images")
+    imgs = [load_image(image_dir + files[i]) for i in range(n)]
+    # Load groundtruth
+    gt_dir = root_dir + "/training/groundtruth/"
+    if verbose : print("Loading " + str(n) + " groundtruth images")
+    gt_imgs = [load_image(gt_dir + files[i]) for i in range(n)]
+    # Padding
+    if verbose : 
+        if pad_size > 0:  print('Padding images using pad of: ', pad_size)        
+    imgs = padding_imgs(np.array(imgs),pad_size)
+    gt_imgs = padding_GT(np.array(gt_imgs),pad_size)
+    # Print some infos
+    if verbose : print('Shape of imgs: ',imgs.shape)
+    if verbose : print('Shape of gt_imgs: ',gt_imgs.shape)
+
+    return imgs, gt_imgs    
+     
 def pick_test_images(root_dir = '../Data'):
     ''' Pick the images, located in the root directory. 
+
     Parameters:
     root_dir: folder containining the training images and the set images
+
     Returns:
     test_imgs: np array containing the test images
     '''
@@ -202,13 +188,18 @@ def pick_test_images(root_dir = '../Data'):
                 str(i) + '.png'
         test_imgs.append(load_image(name))
     return np.asarray(test_imgs)
-    
-    
+
+################################################################################
+###################   IMAGES MANIPULATION   ####################################
+################################################################################
+
 def padding_imgs(imgs,pad_size):
     ''' Pad an array of RGB images using NumPy. Mirror boundary conditions.
+
     Parameters:
     imgs: 4 dimensional np array. Each element contains an RGB image
     pad_size: padding size
+
     Returns:
     X: 4 dimensional np array. Each element contains the padded RGB image
     '''
@@ -224,12 +215,13 @@ def padding_imgs(imgs,pad_size):
         X[i] = temp
     return X
 
-
 def padding_GT(imgs,pad_size):
     ''' Pad an array of 1 channel images using NumPy.
+
     Parameters:
     imgs: 3 dimensional np array. Each element contains a 1 channel image
     pad_size: padding size
+
     Returns:
     X: 3 dimensional np array. Each element contains the padded image
     '''
@@ -253,6 +245,7 @@ def imgs_to_inputs(imgs, img_size, patch_size, input_size):
     them, this function allows to extract patches of the desired dimension,
     centered around the non overlapped patches of dimensions 
     (patch_size x patch_size) that would fit in the original image.
+
     Parameters:
     imgs: 4 dimensional np array. Each element contains an RGB image
     img_size: height and width of the each image
@@ -260,6 +253,9 @@ def imgs_to_inputs(imgs, img_size, patch_size, input_size):
         patches
     input_size: defines the dimension of the elements of the returned array, 
         that will be of (input_size x input_size x nb_channels)
+
+    Returns:
+    Array of elements of dimension (input_size x input_size x nb_channels)
     '''
     inputs = []
     # For each padded image
@@ -276,15 +272,16 @@ def imgs_to_inputs(imgs, img_size, patch_size, input_size):
 
     return np.asarray(inputs)
 
-
 def data_augmentation(X, rot_flag, flip_flag, bright_flag, 
                       bright_range = 0.3, contr_range = 0.25):
     '''Data augmentation on X, RGB image.
+
     Performs arbitrary flipping, rotations and random changes to contrast and
     brightness.
     NOTE: default ranges of contrast and brightness are decided based on several
           training results and on heuristic considerations. If the parameters 
           are too high, the images becomes not recognizable.
+
     Parameters:
     X: RGB image (usually a single patch)
     rot_flag: randomly add 0, 1, 2 or 3 rotations of 90° to X
@@ -319,14 +316,17 @@ def data_augmentation(X, rot_flag, flip_flag, bright_flag,
 
 def crop_center(img, cropx, cropy):
     ''' Crop a patch from img. 
+
     The crop will be centered in the middle of the image and will be of 
     dimensions (cropx x cropy). Works both for 1 and 3 channel images.
     This function is used after a rotation of an arbitrary degree, to retrieve
     a square patch.
+
     Parameters:
     img: img to be rotated
     cropx: width of the crop
     cropy: height of the crop
+
     Return:
     cntr: central portion of the image of size (cropx x cropy)
     '''
@@ -340,68 +340,43 @@ def crop_center(img, cropx, cropy):
     cntr = img[starty:starty+cropy,startx:startx+cropx]
     return cntr
 
+################################################################################
+#######################   SUBMISSION   #########################################
+################################################################################
 
-def LoadImages(pad_size = 0, root_dir = "../Data/", verbose = 1):
-    ''' Load images and pad them using mirror boundary conditions. If pad_size
-    is zero, then the images are not padded.
-    Parameters: 
-    pad_size: padding size, boundary conditions
-    root_dir = folder containining the training images and the set images
-    verbose: verbosity level
-    return:
-    imgs: 4 dimensional np array containing RGB images
-    gt_imgs: 3 dimentsional np array containing groundtruth images
-    '''
-    # Load images
-    image_dir = root_dir + "/training/images/"
-    files = os.listdir(image_dir)
-    n = len(files)
-    if verbose : print("Loading " + str(n) + " images")
-    imgs = [load_image(image_dir + files[i]) for i in range(n)]
-    # Load groundtruth
-    gt_dir = root_dir + "/training/groundtruth/"
-    if verbose : print("Loading " + str(n) + " groundtruth images")
-    gt_imgs = [load_image(gt_dir + files[i]) for i in range(n)]
-    # Padding
-    if verbose : 
-        if pad_size > 0:  print('Padding images using pad of: ', pad_size)        
-    imgs = padding_imgs(np.array(imgs),pad_size)
-    gt_imgs = padding_GT(np.array(gt_imgs),pad_size)
-    # Print some infos
-    if verbose : print('Shape of imgs: ',imgs.shape)
-    if verbose : print('Shape of gt_imgs: ',gt_imgs.shape)
-
-    return imgs, gt_imgs
-
-def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, 
-                                                                   PLOT = True):
-    ''' Load the predicion of one model and return one image.
+def MY_masks_to_submission(submission_filename, masks1D):
+    ''' Converts the matrix containing all the labels into a submission file.
     
     Parameters: 
-    PredictionName: name of the (pickle) file with the prediction
-    IDX: index of the image that will be returned
-    img_size: size of the image that will be returned
-    patch_size: size of the patches contained in the prediction
-    PLOT: if true a plot will be produced
-    Returns:
-    im: the IDXth predicted image
+    submission_filename: name of the file that will contain the submission
+    masks1D: 2-dimensional np array. The ith row contains the labels of 
+        the ith test image
     '''
-    # Getting back the prediction:
-    with open(PredictionName, 'rb') as f: 
-        predicted_labels_1D = pickle.load(f)
-    predicted_labels = predicted_labels_1D.reshape(50,-1)
+    with open(submission_filename, 'w') as f:
+        f.write('id,prediction\n')
+        for idx,fn in enumerate(masks1D):
+            f.writelines('{}\n'.format(s) for s in 
+                                        MY_mask_to_submission_strings(fn,idx))
+      
+    
+def MY_mask_to_submission_strings(mask1D, img_number):
+    '''To be called inside MY_masks_to_submission.
 
-    # Get the labels related to image IDX and create an image
-    im = label_to_img(img_size, img_size, patch_size, patch_size, predicted_labels[IDX])
-
-    if PLOT: plt.imshow(im)
-    return im
-
+    Write the informations of the image img_number, starting from the 1D array 
+    containing the predicted labels of the image.
+    '''
+    patch_size = 16
+    test_size = 608
+    im = label_to_img(test_size, test_size, patch_size, patch_size, mask1D)
+    for j in range(0, im.shape[1], patch_size):
+        for i in range(0, im.shape[0], patch_size):
+            patch = im[i:i + patch_size, j:j + patch_size]
+            label = patch_to_label(patch)
+            yield("{:03d}_{}_{},{}".format(img_number+1, j, i, label))
 
 ################################################################################
 ######################   POST-PROCESSING    ####################################
 ################################################################################
-
 
 def street_surrounded(predicted_image, T, addstreet):
     ''' is_foreground_sorrounded'''
@@ -583,3 +558,54 @@ def post_process_and_submit(PredictionName, SubmissionName, verbose = 1):
     if verbose: print('Submission saved in: ', SubmissionName)
 
     return
+
+
+################################################################################
+##########################    VARIOUS    #######################################
+################################################################################
+
+def get_idx_split_data(N, ratio, seed=1):
+    '''Split the dataset based on the split ratio.
+    
+    Parameters:
+    N: the number of data that we need to split
+    ratio: ratio of the splitting
+    seed: numpy random seed selection
+
+    Returns:
+    idx_tr, idx_val: random indices to select the train/validation set.
+    '''
+    #Set seed
+    np.random.seed(seed)
+    idx_permuted = np.random.permutation(np.arange(N))
+    #Used to compute how many samples correspond to the desired ratio.
+    limit = int(N*ratio)
+    idx_tr = idx_permuted[:limit]
+    idx_val = idx_permuted[(limit+1):]
+    return idx_tr, idx_val
+
+def VisualizePrediction(PredictionName, IDX, img_size, patch_size = 16, 
+                                                                   PLOT = True):
+    ''' Load the predicion of one model and return one image.
+    
+    Parameters: 
+    PredictionName: name of the (pickle) file with the prediction
+    IDX: index of the image that will be returned
+    img_size: size of the image that will be returned
+    patch_size: size of the patches contained in the prediction
+    PLOT: if true a plot will be produced
+
+    Returns:
+    im: the IDXth predicted image
+    '''
+    # Getting back the prediction:
+    with open(PredictionName, 'rb') as f: 
+        predicted_labels_1D = pickle.load(f)
+    predicted_labels = predicted_labels_1D.reshape(50,-1)
+
+    # Get the labels related to image IDX and create an image
+    im = label_to_img(img_size, img_size, patch_size, patch_size, 
+            predicted_labels[IDX])
+
+    if PLOT: plt.imshow(im)
+    return im
