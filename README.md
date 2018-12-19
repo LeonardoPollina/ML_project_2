@@ -20,12 +20,12 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 1. Check the version of your libraries and install the missing ones.
 2. Open the `config.py` file and set the following parameters: <code>ROOT_DIR</code> (directory containing the set images), <code>NameWeights</code> (name of the file were the weights are saved) and <code>SubmissionName</code> (name of the file where the submission will be saved).
 3. Note that the file containing the weights should be placed in the same folder as the script `run.py`.
-4. Execute the script `run.py`. 
+4. Execute the script `run.py`. (MAYBE TO WRITE EXACTLY THE LINE TO RUN ON THE TERMINAL TO RUN THE MODEL --> SOMETHING LIKE "python run.py" ??)
 
 # Content description
 We are going to illustrate the structure of the present folder, its sub-folders and the main files.
 
-## Folder structure
+## Folder structure (THIS TITLE IS MAYBE NOT NECESSARY AND THE SENTENCE COULD BE "Structure of the present folder, its sub-folders and the main files :" )
 
     .
     ├── run.py                                    # Predict and generate a submission file
