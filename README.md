@@ -27,16 +27,16 @@ We are going to illustrate the structure of the folder and then to describe the 
 ## Folder structure
 
     .
-    ├── run.py                                 # Predict and generate a submission file
-    ├── config.py                              # A couple of configuration parameters
+    ├── run.py                                    # Predict and generate a submission file
+    ├── config.py                                 # A couple of configuration parameters
     ├── Notebooks                       
-    │   ├── qualcosa1                          # Training of the final model
-    │   ├── qualcosa2                          # Training with only one neuron at the end
-    │   └── Logistic_regression.ipynb          # Logistic regression
+    │      ├── qualcosa1                          # Training of the final model
+    │      ├── qualcosa2                          # Training with only one neuron at the end
+    │      └── Logistic_regression.ipynb          # Logistic regression
     └── src
     │    ├── models                       
-    │    |   ├── nome_modello_finale           # Final model
-    │    |   └── ...                           # Other models
+    │    |      ├── nome_modello_finale           # Final model
+    │    |      └── ...                           # Other models
     |    ├── utilities.py                 
     |    ├── training_and_prediction.py
     |    ├── f1_score.py
@@ -68,6 +68,7 @@ bla bla bla
     These functions are general utilities that do not rely on the class <code>MODEL_CLASS()</code>; the file is divided in sub-sections.
     <ul>
         <li><b>Given functions:</b></li> This section contains the functions that we used but that have not been implemented by us. This functions have been given along with the project description, or throughout the course laboratories.
+        <li><b>Add-section(s?):</b></li> bla bla bla bla.
         <li><b>Post-processing:</b></li> Functions used to manipulate the prediction in order to improve the F1-score. We tried to apply some "continuity" criteria to improve our prediction.
     </ul>
     </li>
