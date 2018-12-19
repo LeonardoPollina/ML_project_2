@@ -13,7 +13,7 @@ The project has been done using `Python 3.6.5`. Moreover, we rely on various lib
 | Keras       | 2.2.4         |
 | Tensorflow  | 1.12.0        |
 
-Note: `Keras` could be used also with `Theano` as a backend; however, our code is based on `Tensorflow`.
+Note: `Keras` could be used also with `Theano` as a backend; however, our code is based on `Tensorflow`. Make sure that you are using the correct backend.
 
 
 # Generate the prediction
@@ -72,7 +72,8 @@ bla bla bla
 <li><b>training_and_prediction.py</b></li>
     These functions rely on the class <code>MODEL_CLASS()</code>. As the name of the file suggests, these methods are used to train a Keras model, generate a prediction and handle the prediction results.
 <li><b>f1_Score.py</b></li>
-    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. We implemented our customed F1-score metrics starting from the functions of the old version of Keras. This can be used in the case of a model with only one unit in the final layer.
+    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. We implemented in this file our customed F1-score metrics starting from the functions of the old version of Keras. 
+    <b>NOTE</b>: This can be only used in the case of a model with one unit in the final layer.
 <li><b>logistic_utilities.py</b></li>
     These are the functions used in order to train the logistic model.
 </ul>
@@ -83,7 +84,7 @@ Here you can find some of the models that we tried. The models are defined using
     <li><b>nome_modello_finale.py:</b></li> 
     This is our final model
     <li><b>One_unit_model.py:</b></li> 
-    This is a model that has only one unit in the final layer. 
+    This is an example of a model that has only one unit in the final layer. At this level, the main differences are 2: the returned label of the function <code>MinibatchGenerator(X,Y)</code> are categorical with 2 classes, and the <code>metrics</code> include our function to compute F1-score.
     <li><b>Recurrent_model.py:</b></li> 
     An example of one of the models that we tried involving a recurrent neural network.
 </ul>
