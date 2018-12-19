@@ -18,12 +18,12 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 
 # Generate the prediction
 1. Check the version of your libraries and install the missing ones.
-2. Open the `config.py` file and select the following parameters: <code>ROOT_DIR</code> (directory containing the set images), <code>NameWeights</code> (name of the file were the weights are saved) and <code>SubmissionName</code> (name of the file where the submission will be saved).
+2. Open the `config.py` file and set the following parameters: <code>ROOT_DIR</code> (directory containing the set images), <code>NameWeights</code> (name of the file were the weights are saved) and <code>SubmissionName</code> (name of the file where the submission will be saved).
 3. Note that the file containing the weights should be placed in the same folder as the script `run.py`.
 4. Execute the script `run.py`. 
 
 # Content description
-We are going to illustrate the structure of the folder and then to describe the sub-folders and the main files contained in it.
+We are going to illustrate the structure of the present folder, its sub-folders and the main files.
 
 ## Folder structure
 
@@ -46,48 +46,48 @@ We are going to illustrate the structure of the folder and then to describe the 
     └── ReadME.md
 
 ## Notebooks folder
-In this folder, there are notebooks that show our main training procedures. They could be runned, but this is not suggested because of the long computational time that may be required.
+In this folder, there are the notebooks showing our main training procedures. These notebooks have already been run to avoid a waste of time for the reader. 
 
 <ul>
 <li><b>Logistic_regression.ipynb</b></li>
 
-Here it is shown the training procedure in order to find the best hyperparameters (degree of polynomial expansion and regularization parameter) of the regularized logistic regression. We used this classifier only at the very beginning, to have a starting F1-score to compare with the more advanced (and computational demanding) NN models. 
+This notebook shows the training procedure to find the best hyperparameters (degree of polynomial expansion and regularization parameter) of the regularized logistic regression. This classifier was used only at the beginning to have a starting F1-score to compare with the more advanced (and computational demanding) CNN models. 
 
 <li><b>FINAL_MODEL_PROTOTYPE </b></li>
-This notebook shows the training procedure that we applied (80/20 train/validation), applied on our best model.
+This notebook shows the training procedure we applied (80/20 train/validation) to our best model. TO ADD WHICH MODEL THIS IS
 
 <li><b>ONE_NEURON_PROTOTYPE </b></li>
-This notebook shows the training procedure that we applied (80/20 train/validation), applied on one of the models that we tried among the ones with only one neuron in the final layer.
+This notebook shows the training procedure we applied (80/20 train/validation) to a model among those implemented with only one neuron in the output layer.
 </ul>
 
 ## src folder
 
 <ul>
 <li><b>utilities.py</b>
-    These functions are general utilities that do not rely on the class <code>MODEL_CLASS()</code>; the file is divided in sub-sections.
+    These functions are general utilities that do not rely on the class <code>MODEL_CLASS()</code>; the file is divided in the following sub-sections.
     <ul>
-        <li><b>Given functions:</b></li> This section contains the functions that we used but that have not been implemented by us. This functions have been given along with the project description, or throughout the course laboratories.
+        <li><b>Given functions:</b></li> This section contains the functions given with the project or throughout the course laboratories.
         <li><b>Add-section(s?):</b></li> bla bla bla bla.
-        <li><b>Post-processing:</b></li> Functions used to manipulate the prediction in order to improve the F1-score. We tried to apply some "continuity" criteria to improve our prediction.
+        <li><b>Post-processing:</b></li> Functions used to improve the F1-score given by the prediction. Some intuitive "continuity" criteria regarding the streets were applied. 
     </ul>
     </li>
 <li><b>training_and_prediction.py</b></li>
-    These functions rely on the class <code>MODEL_CLASS()</code>. As the name of the file suggests, these methods are used to train a Keras model, generate a prediction and handle the prediction results.
+    These functions rely on the class <code>MODEL_CLASS()</code>. These methods are used to train a Keras model, to generate a prediction and to handle the prediction results.
 <li><b>f1_score.py</b></li>
-    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. We implemented in this file our customed F1-score metric starting from the functions of the old version of Keras. 
-    <br><b>NOTE</b>: This can be only used in the case of a model with one unit in the final layer.
+    In Keras 2.0, F1-score has been removed from the available <code>metrics</code> of the sequential model's <code>compile</code> function. In this file our customized F1-score metric was implemented, based on the F1-score functions  of the old version of Keras. 
+    <br><b>NOTE</b>: This can only be used in the case of a model with one neuron in the output layer.
 <li><b>logistic_utilities.py</b></li>
-    These are the functions used in order to train the logistic model.
+    These are the functions used in order to train the logistic regression model.
 </ul>
 
 ## models folder
-Here you can find some of the models that we tried. The models are defined using a class called <code>MODEL_CLASS()</code>, and according to the attributes and the methods of this class different models can be defined.
+Here you can find some of the models we tried. These models are defined using a single class called <code>MODEL_CLASS()</code>. According to the definition of its attributes, different models can be implemented.
 <ul>
     <li><b>nome_modello_finale.py:</b></li> 
-    This is our final model
+    This is our final model. DESCRIPTION?
     <li><b>One_unit_model.py:</b></li> 
-    This is an example of a model that has only one unit in the final layer. At this level, the main differences are 2: the returned label of the function <code>MinibatchGenerator(X,Y)</code> are categorical with 2 classes, and the <code>metrics</code> include our function to compute F1-score.
+    This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary\ and the F1-score is computed among the <code>metrics</code>.
     <li><b>Recurrent_model.py:</b></li> 
-    An example of one of the models that we tried involving skip connections (i.e. recurrent neural network).
+    This is an example of one of the models we tried involving skip connections (i.e. recurrent neural network).
 </ul>
  
