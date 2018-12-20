@@ -31,8 +31,7 @@ We are going to illustrate the structure of the present folder, its sub-folders 
     .
     ├── Notebooks                       
     |   ├── Best_model_training.ipynb          # Training of our best model
-    │   ├── Logistic_regression.ipynb          # Logistic regression
-    │   └── Training_example_1_neuron.ipynb    # Training with only one neuron at the end
+    │   └── Logistic_regression.ipynb          # Logistic regression
     └── src
     │   ├── models                       
     │   |   ├── best_model.py                  # Our best model
@@ -101,7 +100,7 @@ Here you can find some of the models we tried. These models are defined using a 
     <li><b>nome_modello_finale.py:</b></li> 
     This is our final model. It consists on a VGG-like network with 2 classes in the final layer. The derivation of its architecture and its parameters is described in the report.
     <li><b>model_vgg_1_neuron.py:</b></li> 
-    This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary and the F1-score is computed among the <code>metrics</code>.
+    This is an example of a model that has only one neuron in the output layer. The two main differences with a model with 2 neurons in the last layer are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary and the F1-score is computed among the <code>metrics</code>. This allows a simpler validation procedure, since we can rely on the parameter <code>validation_data</code> when we call the sequential model's <code>fit_generator</code> function.
     <li><b>model_RNN.py:</b></li> 
     This is an example of one of the models containing alternative paths inside the architecture (i.e. Recurrent Neural Network).
 </ul>
