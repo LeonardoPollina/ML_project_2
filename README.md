@@ -1,6 +1,6 @@
 # Machine learning project 2 (CS-433)
 ### Option 2: Road Segmentation
-In this folder, there are all the functions needed to develop our project on road segmentation of satellite aerial images. The aim of the project is to segment an RGB image into small patches, and to assign to each one of them a binary label: value 1 means that there is a street, while 0 represents everything else (grass, houses, parking lots, etc...).
+This folder contains all the functions needed to develop our project on road segmentation of satellite aerial images. The aim of the project is to segment an RGB image into small patches, and to assign to each one of them a binary label: value 1 means that there is a street, while 0 represents everything else (grass, houses, parking lots, etc...).
 
 ### Final score and submission
 Our best CrowdAI score was of <b>0.86</b>. The submission is made by <i>RolexMachineLearningCenter</i> and its ID is: 24383.
