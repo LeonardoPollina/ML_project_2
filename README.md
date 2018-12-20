@@ -20,7 +20,10 @@ Note: `Keras` could be used also with `Theano` as a backend; however, our code i
 1. Check the version of your libraries and install the missing ones.
 2. Open the `config.py` file and set the following parameters: <code>ROOT_DIR</code> (directory containing the set images), <code>NameWeights</code> (name of the file were the weights are saved) and <code>SubmissionName</code> (name of the file where the submission will be saved).
 3. Note that the file containing the weights should be placed in the same folder as the script `run.py`.
-4. Execute the script `run.py`. (MAYBE TO WRITE EXACTLY THE LINE TO RUN ON THE TERMINAL TO RUN THE MODEL --> SOMETHING LIKE "python run.py" ??)
+4. Execute the script `run.py`. 
+```python
+python3 run.py
+```
 
 # Content description
 We are going to illustrate the structure of the present folder, its sub-folders and the main files.
@@ -44,7 +47,7 @@ We are going to illustrate the structure of the present folder, its sub-folders 
     ├── run.py                                 # Predict and generate a submission file
     └── WeigthsFinalModel                      # Weights of the final model
 
-## Notebooks folder
+## Notebooks (folder)
     .                        
     ├── Notebooks                       
     │   └── ...        
@@ -54,11 +57,7 @@ In this folder, there are the notebooks showing our main training procedures. Th
 <ul>
 <li><b>Best_model_training.ipynb</b></li>
 
-This notebook shows the training procedure we applied (80/20 train/validation) to our best model. TO ADD WHICH MODEL THIS IS
-
-<li><b>Training_example_1_neuron.ipynb</b></li>
-
-This notebook shows the training procedure we applied (80/20 train/validation) to a model among those implemented with only one neuron in the output layer.
+This notebook shows the training procedure we applied (80/20 train/validation) to our best model, this model can be found in `src/models/best_model.py`. 
 
 <li><b>Logistic_regression.ipynb</b></li>
 
@@ -66,7 +65,7 @@ This notebook shows the training procedure to find the best hyperparameters (deg
 
 </ul>
 
-## src folder
+## src (folder)
     .                        
     ├── src                       
     │   └── ...        
@@ -91,7 +90,7 @@ This notebook shows the training procedure to find the best hyperparameters (deg
     These are the functions used in order to train the logistic regression model.
 </ul>
 
-### models folder (IT SHOULD BE CLEAR THAT THIS IS INSIDE SRC FOLDER)
+### models (folder)
     .                        
     ├── src                       
     │    ├── models
@@ -100,7 +99,7 @@ This notebook shows the training procedure to find the best hyperparameters (deg
 Here you can find some of the models we tried. These models are defined using a single class called <code>MODEL_CLASS()</code>. According to the definition of its attributes, different models can be implemented.
 <ul>
     <li><b>nome_modello_finale.py:</b></li> 
-    This is our final model. DESCRIPTION?
+    This is our final model. It consists on a VGG-like network with 2 classes in the final layer. The derivation of its architecture and its parameters is described in the report.
     <li><b>model_vgg_1_neuron.py:</b></li> 
     This is an example of a model that has only one neuron in the output layer. The two main differences with the final model are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary and the F1-score is computed among the <code>metrics</code>.
     <li><b>model_RNN.py:</b></li> 
