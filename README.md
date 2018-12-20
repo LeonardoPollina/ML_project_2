@@ -2,6 +2,9 @@
 ### Option 2: Road Segmentation
 In this folder, there are all the functions needed to develop our project on road segmentation of satellite aerial images. The aim of the project is to segment an RGB image into small patches, and to assign to each one of them a binary label: value 1 means that there is a street, while 0 represents everything else (grass, houses, parking lots, etc...).
 
+### Final score and submission
+Our best CrowdAI score was of <b>0.86</b>. The submission is made by <i>RolexMachineLearningCenter</i> and its ID is: 24383.
+
 ### Required setup/libraries
 The project has been done using `Python 3.6.5`. Moreover, we rely on various libraries listed in the table below. 
 
@@ -97,7 +100,7 @@ This notebook shows the training procedure to find the best hyperparameters (deg
     .
 Here you can find some of the models we tried. These models are defined using a single class called <code>MODEL_CLASS()</code>. According to the definition of its attributes, different models can be implemented.
 <ul>
-    <li><b>nome_modello_finale.py:</b></li> 
+    <li><b>best_model.py:</b></li> 
     This is our final model. It consists on a VGG-like network with 2 classes in the final layer. The derivation of its architecture and its parameters is described in the report.
     <li><b>model_vgg_1_neuron.py:</b></li> 
     This is an example of a model that has only one neuron in the output layer. The two main differences with a model with 2 neurons in the last layer are the following: the returned label of the function <code>MinibatchGenerator(X,Y)</code> is binary and the F1-score is computed among the <code>metrics</code>. This allows a simpler validation procedure, since we can rely on the parameter <code>validation_data</code> when we call the sequential model's <code>fit_generator</code> function.
