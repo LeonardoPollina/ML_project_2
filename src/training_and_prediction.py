@@ -34,6 +34,7 @@ def train(X, Y, MODEL, validation_ratio = -1):
     
     # Reproducibility + remember the deadline is the 20.12.2018
     np.random.seed(20122018) 
+    set_seed_tensorflow(20122018)
     
     # Training...
     if (validation_ratio <= 0) or (validation_ratio >= 1):
@@ -122,10 +123,11 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont,
 
     # We need to change seed, so we pick different data
     np.random.seed(seed) 
-    
+    set_seed_tensorflow(seed)
+
     # Training...
     if (validation_ratio <= 0) or (validation_ratio >= 1):
-        #Some informations
+        # Some informations
         print('Restarting training...')
         print('Training (padded) images shape: ', X.shape) 
         print(f'Epochs: {MODEL.epochs}\nBatch_size: {MODEL.batch_size}')
@@ -142,7 +144,7 @@ def ContinueTrain(X, Y, MODEL, NameOld, NameNew, epochs_cont,
             pass
 
     else:
-        #Some informations
+        # Some informations
         print('Restarting training...')
         print('Validation ratio: ', validation_ratio)
         X_tr, X_val, Y_tr, Y_val = split_data(X, Y, validation_ratio, seed = 1)

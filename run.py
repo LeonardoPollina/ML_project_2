@@ -1,6 +1,9 @@
-print('Machine Learning (CS-433) project 2.')
-print('Satellite aerial image segmentation.\n')
-print('Group members: Nicola Ischia, Marion Perier, Leonardo Pollina.\n\n')
+print('------------ Machine Learning (CS-433) project 2 ----------------------')
+print('------------ Satellite aerial image segmentation ----------------------')
+print('Group members:\n'
+      '  -  Nicola Ischia (nicola.ischia@epfl.ch)\n'
+      '  -  Marion Perier (marion.perier@epfl.ch)\n'
+      '  -  Leonardo Pollina (leonardo.pollina@epfl.ch)\n\n')
 
 print('------------------------- IMPORT --------------------------------------')
 print('Importing libraries...')
@@ -32,11 +35,12 @@ print('Weights are loaded from: ', NameWeights)
 print('Predicting (this may take a few minutes)...')
 PredictAndSubmit(MODEL, NameWeights, SubmissionName, TempPredictionName,
                      root_dir = ROOT_DIR, verbose = 0)
-# Clean the temporary prediction file prediction
-os.remove(TempPredictionName)
 print('Done!')
 
 print('\n\n')
 print('-------------------- POST-PROCESSING ----------------------------------')
 post_process_and_submit(TempPredictionName, SubmissionName, verbose = 0)
 print('Submission saved in: ', SubmissionName)
+
+# Clean the temporary file prediction
+os.remove(TempPredictionName)

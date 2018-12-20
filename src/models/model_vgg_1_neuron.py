@@ -1,5 +1,15 @@
 # VGG-like model with only one neuron in the final layer.
-# With this model (without post-processing) we obtained a F1-score of: 0.821
+#
+# With this model (without post-processing) we obtained a CrowdAI F1-score 
+# of: 0.821
+
+# This class defines the parameter of the model. Moreover, 3 functions must be 
+# defined in this class:
+# 1. MinibatchGenerator: generate a minibatch starting from X and Y, the 
+#    padded version of the images and groundtruth images
+# 2. CreateModel: generate a Keras model
+# 3. Summary: print some informations about the model
+
 
 from utilities import *
 from f1_score import *

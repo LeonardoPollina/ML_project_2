@@ -26,6 +26,8 @@ from keras.layers import Input, concatenate
 from keras.models import Model
 from keras.layers import BatchNormalization
 
+from tensorflow import set_random_seed as set_seed_tensorflow
+
 ################################################################################
 ##################### GIVEN FUNCTIONS ##########################################
 ################################################################################
@@ -34,14 +36,16 @@ from keras.layers import BatchNormalization
 foreground_threshold = 0.25 
 
 def value_to_class(v):
+    '''Use the foreground_threshold to select if v is a street or not'''
     df = np.sum(v)
     if df > foreground_threshold:
         return 1
     else:
         return 0
 
-# assign a label to a patch
+
 def patch_to_label(patch):
+    '''Assign a label to a patch'''
     df = np.mean(patch)
     if df > foreground_threshold:
         return 1
@@ -49,16 +53,18 @@ def patch_to_label(patch):
         return 0
 
 def load_image(infilename):
+    '''Load one image'''
     data = mpimg.imread(infilename)
     return data
 
 def img_float_to_uint8(img):
+    '''Img conversion'''
     rimg = img - np.min(img)
     rimg = (rimg / np.max(rimg) * 255).round().astype(np.uint8)
     return rimg
 
-# Concatenate an image and its groundtruth
 def concatenate_images(img, gt_img):
+    '''Concatenate an image and its groundtruth'''
     nChannels = len(gt_img.shape)
     w = gt_img.shape[0]
     h = gt_img.shape[1]
@@ -91,6 +97,7 @@ def extract_img_features(filename, patch_size = 16):
     return X
 
 def img_crop(im, w, h):
+    '''Crop patches from an image'''
     list_patches = []
     imgwidth = im.shape[0]
     imgheight = im.shape[1]
@@ -106,7 +113,7 @@ def img_crop(im, w, h):
     
 def label_to_img(imgwidth, imgheight, w, h, labels):
     ''' From a vector of labels creates an image of (imgwidth x imgheight).
-        Each label refers to a patch of dimension (w x h)
+    Each label refers to a patch of dimension (w x h)
     '''
     im = np.zeros([imgwidth, imgheight])
     idx = 0
@@ -117,6 +124,7 @@ def label_to_img(imgwidth, imgheight, w, h, labels):
     return im
 
 def make_img_overlay(img, predicted_img):
+    '''Overlay two images'''
     w = img.shape[0]
     h = img.shape[1]
     color_mask = np.zeros((w, h, 3), dtype=np.uint8)
@@ -393,30 +401,42 @@ def MY_mask_to_submission_strings(mask1D, img_number):
 ######################   POST-PROCESSING    ####################################
 ################################################################################
 
-def street_surrounded(predicted_image, T, addstreet):
-    ''' is_foreground_sorrounded'''
-    '''If the boolean parameter 'addstreet' is set to true, it takes an image and convert 
-       foreground patches into street if they are surrounded by at least T street patches.
-       
-       If the boolean parameter 'addstreet' is set to false, it takes an image and convert 
-       stre
-        Image is a 2D array containing the patches.
+def is_surrounded(predicted_image, T, addstreet):
+    '''Check if a patch is surrounded by street/foreground and eventually 
+    change its value to the value of the surrounding patches.
+
+    Parameters:
+    predicted_image: 2D np array that contains the values of the predictions
+    T: threshold, if there are more than T patches that are street/foreground 
+        around one patch then we change its value
+    addstreet: choose the behaviour of the function. If it is set to true, it 
+        takes an image and convert foreground patches into street if they are
+        surrounded by at least T street patches. If it is set to false, it takes
+        an image and convert street patches to foreground if they are
+        surrounded by at least T foreground patches
+
+    Returns:
+    2D np array containing the post-processed patches.
     '''
     nbr_patches = predicted_image.shape[0]
+
+    # Central part of the image
     for row in range(1,nbr_patches-1):
         for col in range (1,nbr_patches-1): 
             # Looking at the label of my_patch's neighbors
-            nghb_left = predicted_image[col,row-1];
-            nghb_right = predicted_image[col,row+1];
-            nghb_up = predicted_image[col-1,row];
-            nghb_down = predicted_image[col+1,row];
-            nghb_up_left = predicted_image[col-1,row-1];
-            nghb_up_right = predicted_image[col-1,row+1];
-            nghb_down_left = predicted_image[col+1,row-1];
-            nghb_down_right = predicted_image[col+1,row+1];
+            nghb_left = predicted_image[col,row-1]
+            nghb_right = predicted_image[col,row+1]
+            nghb_up = predicted_image[col-1,row]
+            nghb_down = predicted_image[col+1,row]
+            nghb_up_left = predicted_image[col-1,row-1]
+            nghb_up_right = predicted_image[col-1,row+1]
+            nghb_down_left = predicted_image[col+1,row-1]
+            nghb_down_right = predicted_image[col+1,row+1]
 
             # There are 8 neighbors for patches not on the border
-            neighbors = np.array([nghb_left,nghb_right,nghb_up,nghb_down,nghb_up_left,nghb_up_right,nghb_down_left,nghb_down_right])
+            neighbors = np.array([nghb_left, nghb_right, nghb_up, nghb_down,
+                                  nghb_up_left, nghb_up_right, nghb_down_left,
+                                  nghb_down_right])
 
             nbr_labels_street_nghb = np.sum(neighbors)
 
@@ -426,16 +446,18 @@ def street_surrounded(predicted_image, T, addstreet):
                 predicted_image[col,row] = 1
             if((nbr_labels_foreground_nghb >= T) and not(addstreet)):
                 predicted_image[col,row] = 0
-                
+
+    # Borders        
     for col in range (1,nbr_patches-1):
         #Upper border
-        nghb_left = predicted_image[col-1,0];
-        nghb_right = predicted_image[col+1,0];
-        nghb_down_left = predicted_image[col-1,1];
-        nghb_down = predicted_image[col,1];
-        nghb_down_right = predicted_image[col+1,1];
+        nghb_left = predicted_image[col-1,0]
+        nghb_right = predicted_image[col+1,0]
+        nghb_down_left = predicted_image[col-1,1]
+        nghb_down = predicted_image[col,1]
+        nghb_down_right = predicted_image[col+1,1]
         
-        neighbors = np.array([nghb_left,nghb_right,nghb_down,nghb_down_left,nghb_down_right])
+        neighbors = np.array([nghb_left, nghb_right, nghb_down, nghb_down_left, 
+                              nghb_down_right])
         nbr_labels_street_nghb = np.sum(neighbors)
         nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
         
@@ -445,13 +467,14 @@ def street_surrounded(predicted_image, T, addstreet):
                 predicted_image[col,0] = 0
                 
         #Lower border
-        nghb_left = predicted_image[col-1,37];
-        nghb_right = predicted_image[col+1,37];
-        nghb_up_left = predicted_image[col-1,36];
-        nghb_up = predicted_image[col,36];
-        nghb_up_right = predicted_image[col+1,36];
+        nghb_left = predicted_image[col-1,nbr_patches - 1 ]
+        nghb_right = predicted_image[col+1,nbr_patches - 1]
+        nghb_up_left = predicted_image[col-1,nbr_patches - 2]
+        nghb_up = predicted_image[col,nbr_patches - 2]
+        nghb_up_right = predicted_image[col+1,nbr_patches - 2]
         
-        neighbors = np.array([nghb_left,nghb_right,nghb_up,nghb_up_left,nghb_up_right])
+        neighbors = np.array([nghb_left, nghb_right, nghb_up, nghb_up_left, 
+                              nghb_up_right])
         nbr_labels_street_nghb = np.sum(neighbors)
         nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
         
@@ -463,13 +486,14 @@ def street_surrounded(predicted_image, T, addstreet):
                 
     for row in range (1,nbr_patches-1):
         #Left border
-        nghb_right = predicted_image[1,row];
-        nghb_up = predicted_image[0,row-1];
-        nghb_up_right = predicted_image[1,row-1];
-        nghb_down_right = predicted_image[1,row+1];
-        nghb_down = predicted_image[0,row+1];
+        nghb_right = predicted_image[1,row]
+        nghb_up = predicted_image[0,row-1]
+        nghb_up_right = predicted_image[1,row-1]
+        nghb_down_right = predicted_image[1,row+1]
+        nghb_down = predicted_image[0,row+1]
         
-        neighbors = np.array([nghb_right,nghb_up,nghb_down,nghb_up_right,nghb_down_right])
+        neighbors = np.array([nghb_right, nghb_up, nghb_down, nghb_up_right, 
+                              nghb_down_right])
         nbr_labels_street_nghb = np.sum(neighbors)
         nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
         
@@ -479,20 +503,21 @@ def street_surrounded(predicted_image, T, addstreet):
                 predicted_image[0,row] = 0
                 
         #Right border
-        nghb_up = predicted_image[37,row-1];
-        nghb_left = predicted_image[36,row];
-        nghb_up_left = predicted_image[36,row-1];
-        nghb_down_left = predicted_image[36,row+1];
-        nghb_down = predicted_image[37,row+1];
+        nghb_up = predicted_image[nbr_patches-1,row-1]
+        nghb_left = predicted_image[nbr_patches-2,row]
+        nghb_up_left = predicted_image[nbr_patches-2,row-1]
+        nghb_down_left = predicted_image[nbr_patches-2,row+1]
+        nghb_down = predicted_image[nbr_patches-1,row+1]
         
-        neighbors = np.array([nghb_left,nghb_up,nghb_down,nghb_up_left,nghb_down_left])
+        neighbors = np.array([nghb_left, nghb_up, nghb_down, 
+                              nghb_up_left, nghb_down_left])
         nbr_labels_street_nghb = np.sum(neighbors)
         nbr_labels_foreground_nghb = 5 - nbr_labels_street_nghb
         
         if((nbr_labels_street_nghb >= T-3) and (addstreet)):
-                predicted_image[37,row] = 1
+                predicted_image[nbr_patches-1,row] = 1
         if((nbr_labels_foreground_nghb >= T-3) and not(addstreet)):
-                predicted_image[37,row] = 0
+                predicted_image[nbr_patches-1,row] = 0
     
     for row in range (nbr_patches):
         total_label_street = predicted_image[:,row].sum()
@@ -513,6 +538,15 @@ def is_street(predicted_image, L, T):
     The criterium is the following: we select a patch and take the first L 
     neighbouring patches for a total of 2L patches in one direction. If there
     are more than T street patches we turn the current patch into street.
+
+    Parameters:
+    predicted_image: 2D np array that contains the values of the predictions
+    L: number of horizontal/vertical neighbours considered
+    T: threshold, if there are more than T patches that are street then we 
+       change the value
+
+    Returns:
+    2D np array containing the post-processed patches.
     '''
     nbr_patches = predicted_image.shape[0]    
     # Horizontal streets
@@ -537,21 +571,28 @@ def is_street(predicted_image, L, T):
 
 
 def post_process_single(predicted_image):
-    ''' Post processing routine for a single image
+    ''' Post processing routine for a single image.
+
     '''
     # Delete false positive (if a foreground patch is predicted as a street
     # and is sorrounded by 7 foreground patches. 
-    predicted_image = street_surrounded(predicted_image, 8, False)
+    predicted_image = is_surrounded(predicted_image, 8, False)
     
-    # If the patch is predicted as foreground while it actually should be a street 
-    # --> It becomes a street. 
+    # If the patch is predicted as foreground while it actually should be a  
+    # street --> It becomes a street. 
     predicted_image = is_street(predicted_image, 3, 5)
-    predicted_image = street_surrounded(predicted_image, 8, True)
+    predicted_image = is_surrounded(predicted_image, 8, True)
     return predicted_image
 
 def post_process_and_submit(PredictionName, SubmissionName, verbose = 1):
     '''Load the prediction from a (pickle) file called PredictionName and 
-    generate a submission file called SubmissionName
+    generate a submission file called SubmissionName, after having applied
+    the post_process_single to each image.
+
+    Parameters:
+    PredictionName: file name of the prediction file (pickle)
+    SubmissionName: name of the submission file that will be generated
+    verbose: verbosity level
     '''
     # Getting back the prediction:
     if verbose: print('Recovering prediction from: ', PredictionName)
@@ -567,11 +608,11 @@ def post_process_and_submit(PredictionName, SubmissionName, verbose = 1):
     post_processed_labels = np.empty((50,38*38))
     for i in range(50):
         patches_38x38 = test_labels[i].reshape(38,38)
-        post_processed_labels[i] = post_process_single(patches_38x38).reshape(38*38)
+        post_processed_labels[i] = post_process_single(
+                                                   patches_38x38).reshape(38*38)
     if verbose: print('Generating submission...')
     MY_masks_to_submission(SubmissionName, post_processed_labels)
     if verbose: print('Submission saved in: ', SubmissionName)
-
     return
 
 
